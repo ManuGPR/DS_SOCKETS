@@ -4,254 +4,83 @@
 #include <unistd.h>
 #include "mensajes.h"
 #include "claves.h"
+#include "comm.h"
+
 
 int init() {
 	//Función init que manda el mensaje de init al servidor
-	// Se inicializan las colas
-	mqd_t q_server, q_client;
-	size_t cero = 0;
+	int sd, res;
+	char *ip_tuplas = getenv("IP_TUPLAS");
+	char *port_tuplas = getenv("PORT_TUPLAS");
+	int port = itoa(port_tuplas);
+	if (port == 0) {
+		return -1;
+	}    
 	
-	// Se inicializan los atributos de las colas
-	struct mq_attr attr_r;
-	attr_r.mq_msgsize = sizeof(struct Respuesta);
-	attr_r.mq_maxmsg = 1;
+	sd = create_client_socket(ip_tuplas, port);
+	if (sd < 0) {
+		printf("Error en la creación del socket del cliente\n");
+		return -1;
+	}
 
-    //Se escoge el nombre de la cola cliente
-	char q_clientname[16];
-	sprintf(q_clientname, "/CLIENTE-%d", getpid());
-
-    //Se abren las colas
-	q_server = mq_open("/SERVIDOR", O_WRONLY);
-	q_client = mq_open(q_clientname, O_CREAT | O_RDONLY, 0700, &attr_r);
-
-    //Se crean los mensajes de peticion y respuesta
-	struct Peticion p;
-	struct Respuesta r;
-	memset(&p, cero, sizeof(p));
-	strcpy(p.q_clientname, q_clientname);
-	p.op = 0;
-
-    //Se manda la peticion y se recibe la respuesta
-	mq_send(q_server, (char *)&p, sizeof(p), 0);
-	mq_receive(q_client, (char *)&r, sizeof(r), 0);
-
-    //Se cierran las colas
-	mq_close(q_client);
-	mq_close(q_server);
-	mq_unlink(q_clientname);
-	return r.res;
+	char op = 0;
+	char r[4];
+	
+	res = send_message(sd, (char *)&op, sizeof(char));
+	if (res == -1) {
+		printf("Error al enviar la operación\n");
+		return -1;
+	}
+	
+	res = receive_message(sd, (char*)&r, sizeof(r));
+	if (res == -1) {
+		printf("Error al recibir la respuesta\n");
+		return -1;
+	}
+	
+	res = atoi(r);
+	if (res == 0) {return -1;}
+	
+	close(sd);
+	return res;
 }
 
 int set_value(int key, char *value1, int N_value2, double *V_value2){
     //Función set_value que manda el mensaje de set_value al servidor
-    // Se inicializan las colas
-    mqd_t q_server, q_client;
-    size_t cero = 0;
-
-    // Se inicializan los atributos de las colas
-    struct mq_attr attr_r;
-    attr_r.mq_msgsize = sizeof(struct Respuesta);
-    attr_r.mq_maxmsg = 1;
-
-    //Se escoge el nombre de la cola cliente
-    char q_clientname[16];
-    sprintf(q_clientname, "/CLIENTE-%d", getpid());
-
-    //Se abren las colas
-    q_server = mq_open("/SERVIDOR", O_WRONLY);
-    q_client = mq_open(q_clientname, O_CREAT | O_RDONLY, 0700, &attr_r);
-
-    //Se crean los mensajes de peticion y respuesta
-    struct Peticion p;
-    struct Respuesta r;
-    memset(&p, cero, sizeof(p));
-    
-    strcpy(p.q_clientname, q_clientname);
-    p.op = 1;
-    strcpy(p.value1, value1);
-    p.key = key;
-    if (N_value2 <= 32 && N_value2 >= 1) {
-		p.N_value2 = N_value2;
-		memcpy(p.V_value2,V_value2, N_value2 * sizeof(double));
-		
-		//Se manda la peticion y se recibe la respuesta
-		mq_send(q_server, (char *)&p, sizeof(p), 0);
-		mq_receive(q_client, (char *)&r, sizeof(r), 0);
-    }
-    else {
-    	r.res = -1;
-	}
-    
-    //Se cierran las colas
-    mq_close(q_client);
-    mq_close(q_server);
-    mq_unlink(q_clientname);
-    return r.res;
+    return 2;
 }
 
 int get_value(int key, char *value1, int *N_value2, double *V_value2){
     //Función set_value que manda el mensaje de get_value al servidor
-    // Se inicializan las colas
-    mqd_t q_server, q_client;
-    size_t cero = 0;
-
-    // Se inicializan los atributos de las colas
-    struct mq_attr attr_r;
-    attr_r.mq_msgsize = sizeof(struct Respuesta);
-    attr_r.mq_maxmsg = 1;
-
-    //Se escoge el nombre de la cola cliente
-    char q_clientname[16];
-    sprintf(q_clientname, "/CLIENTE-%d", getpid());
-
-    //Se abren las colas
-    q_server = mq_open("/SERVIDOR", O_WRONLY);
-    q_client = mq_open(q_clientname, O_CREAT | O_RDONLY, 0700, &attr_r);
-
-    //Se crean los mensajes de peticion y respuesta
-    struct Peticion p;
-    struct Respuesta r;
-    memset(&p, cero, sizeof(p));
-    strcpy(p.q_clientname, q_clientname);
-    p.op = 2;
-    p.key = key;
-
-    //Se manda la peticion y se recibe la respuesta
-    mq_send(q_server, (char *)&p, sizeof(p), 0);
-    mq_receive(q_client, (char *)&r, sizeof(r), 0);
-
-    //printf(" value_1 = %s, n_value2 = %d, v_value2 = %lf %lf\n", r.value1, r.N_or_exists, r.V_value2[0], r.V_value2[1]);
-    strcpy(value1 , r.value1);
+    
+    // Copia lo recibido
+    /*strcpy(value1, r.value1);
     *N_value2 = r.N_or_exists;
     memcpy(V_value2, r.V_value2, r.N_or_exists * sizeof(double));
-
-    //Se cierran las colas
-    mq_close(q_client);
-    mq_close(q_server);
-    mq_unlink(q_clientname);
-    return r.res;
+	*/
+	
+    return 3;
 }
 
 int modify_value(int key, char *value1, int N_value2, double *V_value2){
     //Función modify_value que manda el mensaje de modify_value al servidor
-    // Se inicializan las colas
-    mqd_t q_server, q_client;
-    size_t cero = 0;
-
-    // Se inicializan los atributos de las colas
-    struct mq_attr attr_r;
-    attr_r.mq_msgsize = sizeof(struct Respuesta);
-    attr_r.mq_maxmsg = 1;
-
-    //Se escoge el nombre de la cola cliente
-    char q_clientname[16];
-    sprintf(q_clientname, "/CLIENTE-%d", getpid());
-
-    //Se abren las colas
-    q_server = mq_open("/SERVIDOR", O_WRONLY);
-    q_client = mq_open(q_clientname, O_CREAT | O_RDONLY, 0700, &attr_r);
-
-    //Se crean los mensajes de peticion y respuesta
-    struct Peticion p;
-    struct Respuesta r;
-    memset(&p, cero, sizeof(p));
-    strcpy(p.q_clientname, q_clientname);
-    p.op = 3;
-    strcpy(p.value1, value1);
-    p.key = key;
-    p.N_value2 = N_value2;
-    memcpy(p.V_value2,V_value2, N_value2 * sizeof(double));
-
-    if (N_value2 <= 32 && N_value2 >= 1) {
-        p.N_value2 = N_value2;
-        memcpy(p.V_value2,V_value2, N_value2 * sizeof(double));
-
-        //Se manda la peticion y se recibe la respuesta
-        mq_send(q_server, (char *)&p, sizeof(p), 0);
-        mq_receive(q_client, (char *)&r, sizeof(r), 0);
+    
+    
+    /*if (N_value2 <= 32 && N_value2 >= 1) {
+    	// envío de mensaje
     }
     else {
-        r.res = -1;
-    }
+        //r.res = -1;
+    }*/
 
-    //Se cierran las colas
-    mq_close(q_client);
-    mq_close(q_server);
-    mq_unlink(q_clientname);
-    return r.res;
+    return 4;
 }
 
 int delete_key(int key){
     //Función delete_key que manda el mensaje de delete_key al servidor
-    // Se inicializan las colas
-    mqd_t q_server, q_client;
-    size_t cero = 0;
-
-    // Se inicializan los atributos de las colas
-    struct mq_attr attr_r;
-    attr_r.mq_msgsize = sizeof(struct Respuesta);
-    attr_r.mq_maxmsg = 1;
-
-    //Se escoge el nombre de la cola cliente
-    char q_clientname[16];
-    sprintf(q_clientname, "/CLIENTE-%d", getpid());
-
-    //Se abren las colas
-    q_server = mq_open("/SERVIDOR", O_WRONLY);
-    q_client = mq_open(q_clientname, O_CREAT | O_RDONLY, 0700, &attr_r);
-
-    //Se crean los mensajes de peticion y respuesta
-    struct Peticion p;
-    struct Respuesta r;
-    memset(&p, cero, sizeof(p));
-    strcpy(p.q_clientname, q_clientname);
-    p.op = 4;
-    p.key = key;
-
-    //Se manda la peticion y se recibe la respuesta
-    mq_send(q_server, (char *)&p, sizeof(p), 0);
-    mq_receive(q_client, (char *)&r, sizeof(r), 0);
-
-    //Se cierran las colas
-    mq_close(q_client);
-    mq_close(q_server);
-    mq_unlink(q_clientname);
-    return r.res;
+    return 5;
 }
 int exist(int key){
     //Función exist que manda el mensaje de exist al servidor
-    // Se inicializan las colas
-    mqd_t q_server, q_client;
-    size_t cero = 0;
-
-    // Se inicializan los atributos de las colas
-    struct mq_attr attr_r;
-    attr_r.mq_msgsize = sizeof(struct Respuesta);
-    attr_r.mq_maxmsg = 1;
-
-    //Se escoge el nombre de la cola cliente
-    char q_clientname[16];
-    sprintf(q_clientname, "/CLIENTE-%d", getpid());
-
-    //Se abren las colas
-    q_server = mq_open("/SERVIDOR", O_WRONLY);
-    q_client = mq_open(q_clientname, O_CREAT | O_RDONLY, 0700, &attr_r);
-
-    //Se crean los mensajes de peticion y respuesta
-    struct Peticion p;
-    struct Respuesta r;
-    memset(&p, cero, sizeof(p));
-    strcpy(p.q_clientname, q_clientname);
-    p.op = 5;
-    p.key = key;
-
-    //Se manda la peticion y se recibe la respuesta
-    mq_send(q_server, (char *)&p, sizeof(p), 0);
-    mq_receive(q_client, (char *)&r, sizeof(r), 0);
-
-    //Se cierran las colas
-    mq_close(q_client);
-    mq_close(q_server);
-    mq_unlink(q_clientname);
-    return r.res;
+    return 6;
 }

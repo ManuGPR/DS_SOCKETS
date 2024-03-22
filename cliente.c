@@ -2,7 +2,6 @@
 #include "claves.h"
 
 int main() {
-
     // Llamada a la función init
     int res = init();
     printf("Init devuelve %d\n", res);
@@ -49,7 +48,6 @@ int main() {
     // Llamada a la función exist 2
     res = exist(key);
     printf("Exist 2 devuelve %d\n", res);
-    return 0;
 
 	return 0;
 }
