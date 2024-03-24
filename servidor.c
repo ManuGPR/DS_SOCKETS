@@ -118,7 +118,6 @@ int get_value_server() {
     }
 
     // Lee los datos
-    int key;
     char value1[256];
     int N;
     double value2[32];
@@ -126,7 +125,7 @@ int get_value_server() {
     if (fscanf(tuple, "%d\n", &key) < 1) {res = -1;}
     if (fscanf(tuple, "%[^\n]s\n", value1) < 1) {res = -1;}
     if (fscanf(tuple, "%d\n", &N) < 1) {res = -1;}
-    for (int i = 0; i < N_or_exists; i++) {
+    for (int i = 0; i < N; i++) {
         if (fscanf(tuple, "%lf", &value2[i]) < 1) {res = -1;}
         if (i < N -1) { fscanf(tuple, ", ");}
     }
@@ -172,9 +171,9 @@ int modify_value_server() {
     if (fprintf(tuple, "%d\n", key) < 0) {res = -1;}
     if (fprintf(tuple, "%s\n", value1) < 0) {res = -1;}
     if (fprintf(tuple, "%d\n", N) < 0) {res = -1;}
-    for (int i = 0; i < value2; i++) {
+    for (int i = 0; i < N; i++) {
         if (fprintf(tuple, "%lf", value2[i]) < 0) {res = -1;}
-        if (i < value2 -1) {fprintf(tuple, ", ");}
+        if (i < N -1) {fprintf(tuple, ", ");}
     }
 
     // Cierra la tupla
@@ -227,7 +226,7 @@ int delete_key_server() {
     pthread_exit(NULL);
 }
 
-int exist_server(struct Peticion * peticion) {
+int exist_server() {
 	int res;
 	int key = 0;
 	
@@ -261,11 +260,12 @@ int main() {
 
 	// Bucle de espera a las peticiones
 	ssize_t b_read;
+	int op;
 	while(1) {
 		pthread_t thread;
 		
 		// Llamada a las funciones
-		switch(p.op) {
+		switch(op) {
 			case 0: pthread_create(&thread, &attr_thr, (void*)init_server, NULL);
 				break;
 			case 1: pthread_create(&thread, &attr_thr, (void*)set_value_server, NULL);

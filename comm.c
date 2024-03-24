@@ -104,7 +104,7 @@ int send_message(int sd, char *buffer, int len) {
 	return 0;
 }
 
-int recieve_message(int sd, char *buffer, int len) {
+int receive_message(int sd, char *buffer, int len) {
 	int r, l=len;
 	
 	do {

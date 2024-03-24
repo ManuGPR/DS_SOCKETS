@@ -2,7 +2,7 @@
 #include <mqueue.h>
 #include <string.h>
 #include <unistd.h>
-#include "mensajes.h"
+#include <stdlib.h>
 #include "claves.h"
 #include "comm.h"
 
@@ -12,7 +12,7 @@ int init() {
 	int sd, res;
 	char *ip_tuplas = getenv("IP_TUPLAS");
 	char *port_tuplas = getenv("PORT_TUPLAS");
-	int port = itoa(port_tuplas);
+	int port = atoi(port_tuplas);
 	if (port == 0) {
 		return -1;
 	}    
