@@ -7,7 +7,7 @@ int main() {
     printf("Init devuelve %d\n", res);
 
     // Llamada a la función set_value
-    int N_value2 = 32;
+    /*int N_value2 = 32;
     double V_value2[N_value2];
     for (int i = 0; i < N_value2; i++) {V_value2[i] = (double)i;}
     res = set_value(10, "prueba de cadena", N_value2, V_value2);
@@ -48,6 +48,6 @@ int main() {
     // Llamada a la función exist 2
     res = exist(key);
     printf("Exist 2 devuelve %d\n", res);
-
+	*/
 	return 0;
 }

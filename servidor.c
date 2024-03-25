@@ -1,11 +1,12 @@
 #include <stdio.h>
-#include <mqueue.h>
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/socket.h>
+#include "comm.h"
 
 #define PATH_MAX 4096
 #define cero 0
@@ -26,11 +27,21 @@ void get_tuple_abs_path(char * tuple_name, int key) {
     strcat(tuple_name, key_str);
 }
 
-int init_server() {
+int init_server(int * sd) {
 	// Declaración de variables necesarias para el init
 	DIR *dir = opendir(abs_path);
 	struct dirent* tuplas;
 	char* file_name;
+	char res[4] = "0";
+	
+	// Recibir la key
+	/*char buffer[128]
+	if (receive_message(*sd, buffer, strlen(buffer)) == -1) {
+		printf("Error: init receive\n");
+		return -1;
+	}
+	
+	int key = atoi(buffer);*/
 	
 	// Mientras haya tuplas en el fichero de tuplas
 	while ((tuplas = readdir(dir)) != NULL) {
@@ -47,6 +58,7 @@ int init_server() {
 			// Se borra el fichero, si hay algún error, se escribe y la respuesta devolverá -1
 			if (remove(file_name) == -1) {	
 				perror("");
+				strcpy(res, "-1");
 			}
 			
 			// Se libera el espacio dinámico
@@ -54,10 +66,16 @@ int init_server() {
 		}
 	}
 	
+	int r = write_line(*sd, res);
+	if (r == -1) {
+		printf("Error al enviar la operación\n");
+		return -1;
+	}
+	close(*sd);
 	pthread_exit(NULL);
 }
 
-int set_value_server() {
+int set_value_server(int * sd) {
 	int res;
 	int key = 0;
 	// Se obtiene el nombre absoluto del fichero
@@ -96,7 +114,7 @@ int set_value_server() {
     pthread_exit(NULL);
 }
 
-int get_value_server() {
+int get_value_server(int * sd) {
 	int res;
 	int key = 0;
 	// Se consigue el path de la tupla
@@ -139,7 +157,7 @@ int get_value_server() {
     pthread_exit(NULL);
 }
 
-int modify_value_server() {
+int modify_value_server(int * sd) {
 	int res;
 	int key = 0;
 	
@@ -182,7 +200,7 @@ int modify_value_server() {
     pthread_exit(NULL);
 }
 
-int delete_key_server() {
+int delete_key_server(int * sd) {
 	int res;
 	int key = 0;
 	
@@ -226,7 +244,7 @@ int delete_key_server() {
     pthread_exit(NULL);
 }
 
-int exist_server() {
+int exist_server(int * sd) {
 	int res;
 	int key = 0;
 	
@@ -249,7 +267,33 @@ int exist_server() {
     pthread_exit(NULL);
 }
 
-int main() {
+int main(int argc, char **argv) {
+	// Se comprueba el número de args
+	if (argc != 2) {
+		printf("Error: Puerto sin especificar\n");
+		return -1;
+	}
+	
+	// Se checkea el puerto
+	int puerto = atoi(argv[1]);
+	if (puerto <= 0) {
+		printf("Error: mal puerto\n");
+		return -1;
+	}
+	
+	/*// Se guarda el puerto en una env
+	if (setenv("PORT_TUPLAS", argv[1], 1) == -1) {
+		printf("Error: setenv puerto\n");
+		return -1;
+	}
+	
+	// Se guarda la IP en una env
+	if (setenv("IP_TUPLAS", "a", 1) == -1) {
+		printf("Error: setenv puerto\n");
+		return -1;
+	}*/
+	
+
 	// Se crean los attr de los threads
 	pthread_attr_t attr_thr;
 	pthread_attr_init(&attr_thr);
@@ -259,24 +303,35 @@ int main() {
 	abs_path = realpath(rel_path, NULL);
 
 	// Bucle de espera a las peticiones
-	ssize_t b_read;
-	int op;
+	char op;
+	
+	// Creación del socket del servidor
+	int socket_server = create_server_socket(puerto, SOCK_STREAM);
+	char buffer[4];
+	int new_sd;
 	while(1) {
-		pthread_t thread;
+		new_sd = accept_server(socket_server);
+		if (read_line(new_sd, buffer, 4) == -1) {
+			printf("Error: receive message\n");
+			return -1;
+		}
 		
+		op = buffer[0];
+		
+		pthread_t thread;
 		// Llamada a las funciones
 		switch(op) {
-			case 0: pthread_create(&thread, &attr_thr, (void*)init_server, NULL);
+			case '1': pthread_create(&thread, &attr_thr, (void*)init_server, (void*)&new_sd);
 				break;
-			case 1: pthread_create(&thread, &attr_thr, (void*)set_value_server, NULL);
+			case '2': pthread_create(&thread, &attr_thr, (void*)set_value_server, (void*)&new_sd);
 				break;
-			case 2: pthread_create(&thread, &attr_thr, (void*)get_value_server, NULL);
+			case '3': pthread_create(&thread, &attr_thr, (void*)get_value_server, (void*)&new_sd);
 				break;
-			case 3: pthread_create(&thread, &attr_thr, (void*)modify_value_server, NULL);
+			case '4': pthread_create(&thread, &attr_thr, (void*)modify_value_server, (void*)&new_sd);
 				break;
-			case 4: pthread_create(&thread, &attr_thr, (void*)delete_key_server, NULL);
+			case '5': pthread_create(&thread, &attr_thr, (void*)delete_key_server, (void*)&new_sd);
 				break;
-			case 5: pthread_create(&thread, &attr_thr, (void*)exist_server, NULL);
+			case '6': pthread_create(&thread, &attr_thr, (void*)exist_server, (void*)&new_sd);
 				break;
 		}
 	}

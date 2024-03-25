@@ -11,38 +11,47 @@ int init() {
 	//Función init que manda el mensaje de init al servidor
 	int sd, res;
 	char *ip_tuplas = getenv("IP_TUPLAS");
+	if (ip_tuplas == NULL) {
+		printf("Error: getenv IP\n");
+		return -1;
+	}
+	
 	char *port_tuplas = getenv("PORT_TUPLAS");
+	if (port_tuplas == NULL) {
+		printf("Error: getenv PORT\n");
+		return -1;
+	}
+	
 	int port = atoi(port_tuplas);
 	if (port == 0) {
 		return -1;
 	}    
-	
+
 	sd = create_client_socket(ip_tuplas, port);
 	if (sd < 0) {
 		printf("Error en la creación del socket del cliente\n");
 		return -1;
 	}
 
-	char op = 0;
+	char *op = "1";
 	char r[4];
 	
-	res = send_message(sd, (char *)&op, sizeof(char));
+	res = write_line(sd, op);
 	if (res == -1) {
 		printf("Error al enviar la operación\n");
 		return -1;
 	}
 	
-	res = receive_message(sd, (char*)&r, sizeof(r));
+	res = read_line(sd, r, 4);
 	if (res == -1) {
 		printf("Error al recibir la respuesta\n");
 		return -1;
 	}
 	
-	res = atoi(r);
-	if (res == 0) {return -1;}
+	if (strcmp(r, "0") != 0) {return -1;}
 	
 	close(sd);
-	return res;
+	return 0;
 }
 
 int set_value(int key, char *value1, int N_value2, double *V_value2){

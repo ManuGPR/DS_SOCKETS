@@ -8,7 +8,7 @@
 #include <errno.h>
 #include "comm.h"
 
-int create_server_socket(unsigned int addr, int port, int type) {
+int create_server_socket(int port, int type) {
 	struct sockaddr_in addr_server;
 	int sd, res;
 	
@@ -28,6 +28,7 @@ int create_server_socket(unsigned int addr, int port, int type) {
 	// Se bindea
 	res = bind(sd, (const struct sockaddr *)&addr_server, sizeof(addr_server));
 	if (res == -1) {
+		perror("");
 		printf("Error en el bind del socket del servidor\n");
 		return -1;
 	}
@@ -60,9 +61,9 @@ int create_client_socket(char * remote, int port) {
 	}
 	
 	bzero((char *)&addr_server, sizeof(addr_server));
-	memcpy(&(server_addr.sin_addr), h->h_addr, h->h_length);
+	memcpy(&(addr_server.sin_addr), h->h_addr, h->h_length);
 	addr_server.sin_family = AF_INET;
-	addr_server.sin_port = hton(port);
+	addr_server.sin_port = htons(port);
 	
 	res = connect(sd, (struct sockaddr *)&addr_server, sizeof(addr_server));
 	if (res < 0) {
@@ -76,11 +77,11 @@ int create_client_socket(char * remote, int port) {
 int accept_server(int sd) {
 	int sc;
 	struct sockaddr_in addr_client;
-	socklen_t size = sizeof(addr_client;)
+	socklen_t size = sizeof(addr_client);
 	
 	printf("esperando conexión\n");
 
-	sc = accept(sd, (strcut sockaddr *)&addr_client, (socklen_t *)&size); 
+	sc = accept(sd, (struct sockaddr *)&addr_client, (socklen_t *)&size); 
 	if (sc < 0) {
 		printf("Error en el accept del servidor\n");
 		return -1;

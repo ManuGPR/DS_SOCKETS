@@ -11,20 +11,27 @@ clean:
 	rm -f $(BIN_FILES) *.o
 	rm -f *.so
 
-cliente: cliente.c libclaves.so tuplas
-	$(CC) $(CFLAGS) $(QFLAGS) cliente.c -L. -lclaves -o $@
+cliente: cliente.c libcomm.so libclaves.so tuplas
+	$(CC) $(CFLAGS) $(QFLAGS) cliente.c -L. -lclaves -lcomm -o $@
 
-test/%: test/%.c libclaves.so tuplas
-	$(CC) $(CFLAGS) $(QFLAGS) $< -L. -lclaves -o $@
+test/%: test/%.c libcomm.so libclaves.so tuplas
+	$(CC) $(CFLAGS) $(QFLAGS) $< -L. -lclaves -lcomm -o $@
 
 tuplas:
 	mkdir -p tuplas
 
-servidor: servidor.c
-	$(CC) $(CFLAGS) $(QFLAGS) $^ -o $@ 
+servidor: servidor.c libcomm.so
+	$(CC) $(CFLAGS) $(QFLAGS) servidor.c -L. -lcomm -o $@ 
 
-libclaves.so: claves.o
-	$(CC) -shared $(CFLAGS) -o libclaves.so claves.o 
+libcomm.so: comm.o
+	$(CC) -shared $(CFLAGS) -o libcomm.so comm.o
+	 
+comm.o: comm.c
+	$(CC) $(CFLAGS) -c comm.c -o comm.o
+	
+libclaves.so: claves.o libcomm.so
+	$(CC) -shared $(CFLAGS) -o libclaves.so claves.o -L. -lcomm
 	
 claves.o: claves.c
 	$(CC) $(CFLAGS) -c claves.c -o claves.o
+	

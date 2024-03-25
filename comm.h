@@ -1,4 +1,4 @@
-int create_server_socket(unsigned int addr, int port, int type);
+int create_server_socket(int port, int type);
 int create_client_socket(char * remote, int port);
 
 int accept_server(int sd);
