@@ -113,7 +113,7 @@ int set_value(int key, char *value1, int N_value2, double *V_value2){
     }
 
     for(int i = 0; i < N_value2; i++){
-        sprintf(buffer, "%f", V_value2[i]);
+        sprintf(buffer, "%lf", V_value2[i]);
         res = write_line(sd, buffer);
         if (res == -1) {
             printf("Error al enviar V_value2[%i]\n", i);
@@ -170,7 +170,7 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
         return -1;
     }
 
-    sprintf(buffer, "%i", key);
+    sprintf(buffer, "%d", key);
     res = write_line(sd, buffer);
     if (res == -1) {
         printf("Error al enviar la key\n");
@@ -201,7 +201,8 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
             printf("Error al hacer atoi\n");
             return -1;
         }
-        //Recibe V_value1
+        
+        // Recibe V_value1
         for(int i = 0; i < *N_value2; i++){
             res = read_line(sd, buffer, 1024);
             if (res == -1) {

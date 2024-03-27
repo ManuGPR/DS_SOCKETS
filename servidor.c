@@ -109,6 +109,7 @@ int set_value_server(int * sd) {
         close(*sd);
         pthread_exit((void*)-1);
     }
+    
     // Recibir N
     int N;
     if (read_line(*sd, buffer, 1024) == -1) {
@@ -126,9 +127,9 @@ int set_value_server(int * sd) {
         pthread_exit((void*)-1);
     }
 
-    //Recibir value2
+    // Recibir value2
     double value2[N];
-    for(int i; i<N; i ++){
+    for(int i = 0; i<N; i ++){
         if (read_line(*sd, buffer, 1024) == -1) {
             printf("Error: read_line incorrecto\n");
             write_line(*sd, "-1");
@@ -200,8 +201,10 @@ int get_value_server(int * sd) {
 
     // Lee los datos
     char value1[256];
+    memset(value1, 0, sizeof(value1));
     int N;
     double value2[32];
+    memset(value2, 0, sizeof(value2));
 
     //Ley key
     if (fscanf(tuple, "%d\n", &key) < 1) {res = -1;}
