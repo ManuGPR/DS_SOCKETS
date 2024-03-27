@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <errno.h>
 #include "claves.h"
 #include "comm.h"
 
@@ -41,12 +42,14 @@ int init() {
 	res = write_line(sd, op);
 	if (res == -1) {
 		printf("Error al enviar la operación\n");
+		close(sd);
 		return -1;
 	}
 	
 	res = read_line(sd, r, 4);
 	if (res == -1) {
 		printf("Error al recibir la respuesta\n");
+		close(sd);
 		return -1;
 	}
 	
@@ -78,6 +81,7 @@ int set_value(int key, char *value1, int N_value2, double *V_value2){
         }
 
         sd = create_client_socket(ip_tuplas, port);
+        
         if (sd < 0) {
             printf("Error en la creación del socket del cliente\n");
             return -1;
@@ -90,6 +94,7 @@ int set_value(int key, char *value1, int N_value2, double *V_value2){
         res = write_line(sd, op);
         if (res == -1) {
             printf("Error al enviar la operación\n");
+            close(sd);
             return -1;
         }
 
@@ -98,43 +103,58 @@ int set_value(int key, char *value1, int N_value2, double *V_value2){
         res = write_line(sd, buffer);
         if (res == -1) {
             printf("Error al enviar la key\n");
+            close(sd);
             return -1;
         }
 
         res = write_line(sd, value1);
         if (res == -1) {
             printf("Error al enviar la key\n");
+            close(sd);
             return -1;
         }
+		
+		// Mensaje de continuación
+		res = read_line(sd, r, 4);
+		if (res == -1) {
+		    printf("Error al recibir la respuesta\n");
+		    close(sd);
+		    return -1;
+		}
+		if (strcmp(r, "0")== 0){
+		
+			sprintf(buffer, "%i", N_value2);
+		    res = write_line(sd, buffer);
+		    if (res == -1) {
+		        printf("Error al enviar N_value2\n");
+		        close(sd);
+		        return -1;
+		    }
 
-        sprintf(buffer, "%i", N_value2);
-        res = write_line(sd, buffer);
-        if (res == -1) {
-            printf("Error al enviar N_value2\n");
-            return -1;
-        }
+		    for (int i = 0; i < N_value2; i++) {
+		        sprintf(buffer, "%lf", V_value2[i]);
+		        res = write_line(sd, buffer);
+		        if (res == -1) {
+		            printf("Error al enviar V_value2[%i]\n", i);
+		            close(sd);
+		            return -1;
+		        }
+		    }
 
-        for (int i = 0; i < N_value2; i++) {
-            sprintf(buffer, "%lf", V_value2[i]);
-            res = write_line(sd, buffer);
-            if (res == -1) {
-                printf("Error al enviar V_value2[%i]\n", i);
-                return -1;
-            }
-        }
+		    res = read_line(sd, r, 4);
+		    if (res == -1) {
+		        printf("Error al recibir la respuesta\n");
+		        close(sd);
+		        return -1;
+		    }
 
-        res = read_line(sd, r, 4);
-        if (res == -1) {
-            printf("Error al recibir la respuesta\n");
-            return -1;
-        }
+		    if (strcmp(r, "0") != 0) { return -1; }
 
-        if (strcmp(r, "0") != 0) { return -1; }
-
-        close(sd);
-        return 0;
-    }
-    return -1;
+		    close(sd);
+		    return 0;
+		}
+	}
+	return -1;
 }
 
 int get_value(int key, char *value1, int *N_value2, double *V_value2){
@@ -171,6 +191,7 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
     res = write_line(sd, op);
     if (res == -1) {
         printf("Error al enviar la operación\n");
+        close(sd);
         return -1;
     }
 
@@ -178,12 +199,15 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
     res = write_line(sd, buffer);
     if (res == -1) {
         printf("Error al enviar la key\n");
+        close(sd);
         return -1;
     }
-    //Mensaje de continuación
+    
+    // Mensaje de continuación
     res = read_line(sd, r, 4);
     if (res == -1) {
         printf("Error al recibir la respuesta\n");
+        close(sd);
         return -1;
     }
     if (strcmp(r, "0")== 0){
@@ -191,6 +215,7 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
         res = read_line(sd, value1, 1024);
         if (res == -1) {
             printf("Error al recibir value1\n");
+            close(sd);
             return -1;
         }
 
@@ -198,15 +223,18 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
         res = read_line(sd, buffer, 1024);
         if (res == -1) {
             printf("Error al recibir N_value2\n");
+            close(sd);
             return -1;
         }
         *N_value2 = atoi(buffer);
         if(*N_value2 == 0){
             printf("Error al hacer atoi\n");
+            close(sd);
             return -1;
         }
         else if (*N_value2 == -1){
             printf("N fuera de rango\n");
+            close(sd);
             return -1;
         }
         
@@ -215,6 +243,7 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
             res = read_line(sd, buffer, 1024);
             if (res == -1) {
                 printf("Error al recibir V_value2\n");
+                close(sd);
                 return -1;
             }
             V_value2[i] = strtod(buffer, NULL);
@@ -261,6 +290,7 @@ int modify_value(int key, char *value1, int N_value2, double *V_value2){
         res = write_line(sd, op);
         if (res == -1) {
             printf("Error al enviar la operación\n");
+            close(sd);
             return -1;
         }
 
@@ -268,41 +298,56 @@ int modify_value(int key, char *value1, int N_value2, double *V_value2){
         res = write_line(sd, buffer);
         if (res == -1) {
             printf("Error al enviar la key\n");
+            close(sd);
             return -1;
         }
 
         res = write_line(sd, value1);
         if (res == -1) {
             printf("Error al enviar la key\n");
+            close(sd);
             return -1;
         }
 
-        sprintf(buffer, "%i", N_value2);
-        res = write_line(sd, buffer);
-        if (res == -1) {
-            printf("Error al enviar N_value2\n");
-            return -1;
-        }
+		// Mensaje de continuación
+		res = read_line(sd, r, 4);
+		if (res == -1) {
+		    printf("Error al recibir la respuesta\n");
+		    close(sd);
+		    return -1;
+		}
+		if (strcmp(r, "0")== 0){
+		
+		    sprintf(buffer, "%i", N_value2);
+		    res = write_line(sd, buffer);
+		    if (res == -1) {
+		        printf("Error al enviar N_value2\n");
+		        close(sd);
+		        return -1;
+		    }
 
-        for (int i = 0; i < N_value2; i++) {
-            sprintf(buffer, "%lf", V_value2[i]);
-            res = write_line(sd, buffer);
-            if (res == -1) {
-                printf("Error al enviar V_value2[%i]\n", i);
-                return -1;
-            }
-        }
+		    for (int i = 0; i < N_value2; i++) {
+		        sprintf(buffer, "%lf", V_value2[i]);
+		        res = write_line(sd, buffer);
+		        if (res == -1) {
+		            printf("Error al enviar V_value2[%i]\n", i);
+		            close(sd);
+		            return -1;
+		        }
+		    }
 
-        res = read_line(sd, r, 4);
-        if (res == -1) {
-            printf("Error al recibir la respuesta\n");
-            return -1;
-        }
+		    res = read_line(sd, r, 4);
+		    if (res == -1) {
+		        printf("Error al recibir la respuesta\n");
+		        close(sd);
+		        return -1;
+		    }
 
-        if (strcmp(r, "0") != 0) { return -1; }
+		    if (strcmp(r, "0") != 0) { return -1; }
 
-        close(sd);
-        return 0;
+		    close(sd);
+		    return 0;
+    	}
     }
     return -1;
 }
@@ -340,6 +385,7 @@ int delete_key(int key){
     res = write_line(sd, op);
     if (res == -1) {
         printf("Error al enviar la operación\n");
+        close(sd);
         return -1;
     }
 
@@ -347,12 +393,14 @@ int delete_key(int key){
     res = write_line(sd, buffer);
     if (res == -1) {
         printf("Error al enviar la key\n");
+        close(sd);
         return -1;
     }
 
     res = read_line(sd, r, 4);
     if (res == -1) {
         printf("Error al recibir la respuesta\n");
+        close(sd);
         return -1;
     }
 
@@ -394,22 +442,24 @@ int exist(int key){
     res = write_line(sd, op);
     if (res == -1) {
         printf("Error al enviar la operación\n");
+        close(sd);
         return -1;
     }
 
-    sprintf(buffer, "%i", key);
+    sprintf(buffer, "%d", key);
     res = write_line(sd, buffer);
     if (res == -1) {
         printf("Error al enviar la key\n");
+        close(sd);
         return -1;
     }
 
     res = read_line(sd, r, 4);
     if (res == -1) {
         printf("Error al recibir la respuesta\n");
+        close(sd);
         return -1;
     }
-
 
     close(sd);
     return atoi(r);

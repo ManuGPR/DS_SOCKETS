@@ -15,6 +15,7 @@ const char *rel_path="./tuplas";
 char *abs_path;
 
 pthread_mutex_t mutex;
+pthread_mutex_t a;
 pthread_cond_t copiado;
 int copia = 0;
 
@@ -73,6 +74,7 @@ int init_server(int * nsd) {
         close(sd);
         pthread_exit((void*)-1);
 	}
+
 	close(sd);
 	pthread_exit(NULL);
 }
@@ -103,12 +105,16 @@ int set_value_server(int * nsd) {
         pthread_exit((void*)-1);
 	}
 	
+	// Mensaje de confirmación
+    write_line(sd,"0");
+	
 	// Crea el fichero
 	FILE * tuple;
 	tuple = fopen(tuple_name, "w+");
 	if (tuple == NULL) {
 		perror("");
-		pthread_exit(NULL);
+		close(sd);
+		pthread_exit((void*)-1);
 	}
 
     // Recibir value1
@@ -156,7 +162,7 @@ int set_value_server(int * nsd) {
 		if (fprintf(tuple, "%lf", value2[i]) < 0) {res = -1;}
 		if (i < N -1) {fprintf(tuple, ", ");}
     }
-
+	
     // Cierra la tupla
     fclose(tuple);
 
@@ -169,6 +175,7 @@ int set_value_server(int * nsd) {
         close(sd);
         pthread_exit((void*)-1);
     }
+    
     close(sd);
     pthread_exit(NULL);
 }
@@ -198,6 +205,8 @@ int get_value_server(int * nsd) {
         close(sd);
         pthread_exit((void*)-1);
     }
+    
+    // Mensaje de confirmación
     write_line(sd,"0");
 
     // Abre el archivo
@@ -212,11 +221,9 @@ int get_value_server(int * nsd) {
 
     // Lee los datos
     char value1[256];
-    memset(value1, 0, sizeof(value1));
     int N;
     double value2[32];
-    memset(value2, 0, sizeof(value2));
-
+    
     //Ley key
     if (fscanf(tuple, "%d\n", &key) < 1) {res = -1;}
 
@@ -286,6 +293,9 @@ int modify_value_server(int * nsd) {
         close(sd);
         pthread_exit((void*)-1);
     }
+	
+	// Mensaje de confirmación
+    write_line(sd,"0");
 
     // Crea el fichero
     FILE * tuple;
