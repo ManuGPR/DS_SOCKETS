@@ -215,8 +215,13 @@ int get_value_server(int * sd) {
 
     //Lee N
     if (fscanf(tuple, "%d\n", &N) < 1) {res = -1;}
-    sprintf(buffer, "%i", N);
-    write_line(*sd, buffer);
+    if(N > 32 || N<= 0){
+        write_line(*sd, "-1");
+    }
+    else{
+        sprintf(buffer, "%i", N);
+        write_line(*sd, buffer);
+    }
 
     //Lee value2
     for (int i = 0; i < N; i++) {
@@ -280,10 +285,43 @@ int modify_value_server(int * sd) {
         pthread_exit((void*)-1);
     }
 
-    // Escribe los datos
-    char value1[256] = {"hola"};
-    int N = 1;
-    double value2[1] = {1};
+    // Recibir value1
+    char value1[256];
+    if (read_line(*sd, value1, 256) == -1) {
+        printf("Error: read_line incorrecto\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+
+    // Recibir N
+    int N;
+    if (read_line(*sd, buffer, 1024) == -1) {
+        printf("Error: read_line incorrecto\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+
+    N = atoi(buffer);
+    if (N == 0){
+        printf("Error: en atoi\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+
+    // Recibir value2
+    double value2[N];
+    for(int i = 0; i<N; i ++){
+        if (read_line(*sd, buffer, 1024) == -1) {
+            printf("Error: read_line incorrecto\n");
+            write_line(*sd, "-1");
+            close(*sd);
+            pthread_exit((void*)-1);
+        }
+        value2[i] = strtod(buffer, NULL);
+    }
 
     if (fprintf(tuple, "%d\n", key) < 0) {res = -1;}
     if (fprintf(tuple, "%s\n", value1) < 0) {res = -1;}
@@ -296,12 +334,32 @@ int modify_value_server(int * sd) {
     // Cierra la tupla
     fclose(tuple);
 
+    //Enviar menaje de repuesta
+    sprintf(buffer, "%i", res);
+    int r = write_line(*sd, buffer);
+    if (r == -1) {
+        printf("Error al enviar el resultado\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+    close(*sd);
+
     pthread_exit(NULL);
 }
 
 int delete_key_server(int * sd) {
-	int res;
-	int key = 0;
+    int res = 0, key;
+    char buffer[1024];
+
+    // Recibir la key
+    if (read_line(*sd, buffer, 1024) == -1) {
+        printf("Error: read_line incorrecto\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+    key = atoi(buffer);
 	
 	// Declaración de variables necesarias para el delete key
     DIR *dir = opendir(abs_path);
@@ -340,12 +398,32 @@ int delete_key_server(int * sd) {
    		res = -1;
    	}
 
+    //Enviar menaje de repuesta
+    sprintf(buffer, "%i", res);
+    int r = write_line(*sd, buffer);
+    if (r == -1) {
+        printf("Error al enviar el resultado\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+    close(*sd);
+
     pthread_exit(NULL);
 }
 
 int exist_server(int * sd) {
-	int res;
-	int key = 0;
+    int res = 0, key;
+    char buffer[1024];
+
+    // Recibir la key
+    if (read_line(*sd, buffer, 1024) == -1) {
+        printf("Error: read_line incorrecto\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+    key = atoi(buffer);
 	
 	// Datos para el fichero
     char *tuple_name = calloc(PATH_MAX, sizeof(char));
@@ -362,6 +440,16 @@ int exist_server(int * sd) {
             res = -1;
         }
     }
+    //Enviar menaje de repuesta
+    sprintf(buffer, "%i", res);
+    int r = write_line(*sd, buffer);
+    if (r == -1) {
+        printf("Error al enviar el resultado\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+    close(*sd);
 
     pthread_exit(NULL);
 }

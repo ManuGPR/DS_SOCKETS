@@ -28,7 +28,7 @@ int main() {
         if (i < N_value2_res -1) printf(", ");
         else printf("\n");
     }
-    /*
+
 
     // Llamada a la función modify value
     int new_n = 16;
@@ -40,8 +40,10 @@ int main() {
 
     // Llamada a la función exist 1
     int key = 10;
+
     res = exist(key);
     printf("Exist 1 devuelve %d\n", res);
+
 
     // Llamada a la función delete_key
     res = delete_key(key);
@@ -50,6 +52,6 @@ int main() {
     // Llamada a la función exist 2
     res = exist(key);
     printf("Exist 2 devuelve %d\n", res);
-	*/
+
 	return 0;
 }
