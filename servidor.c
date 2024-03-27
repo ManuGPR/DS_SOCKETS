@@ -34,15 +34,6 @@ int init_server(int * sd) {
 	char* file_name;
 	char res[4] = "0";
 	
-	// Recibir la key
-	/*char buffer[128]
-	if (receive_message(*sd, buffer, strlen(buffer)) == -1) {
-		printf("Error: init receive\n");
-		return -1;
-	}
-	
-	int key = atoi(buffer);*/
-	
 	// Mientras haya tuplas en el fichero de tuplas
 	while ((tuplas = readdir(dir)) != NULL) {
 		
@@ -69,15 +60,27 @@ int init_server(int * sd) {
 	int r = write_line(*sd, res);
 	if (r == -1) {
 		printf("Error al enviar la operación\n");
-		return -1;
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
 	}
 	close(*sd);
 	pthread_exit(NULL);
 }
 
 int set_value_server(int * sd) {
-	int res;
-	int key = 0;
+	int res = 0, key;
+    char buffer[1024];
+
+    // Recibir la key
+    if (read_line(*sd, buffer, 1024) == -1) {
+        printf("Error: read_line incorrecto\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+    key = atoi(buffer);
+
 	// Se obtiene el nombre absoluto del fichero
 	char *tuple_name = calloc(PATH_MAX, sizeof(char));
 	get_tuple_abs_path(tuple_name, key);
@@ -85,7 +88,9 @@ int set_value_server(int * sd) {
 	// Se mira si existe
 	if (access(tuple_name, F_OK) == 0) {	
 		printf("Archivo existe\n");
-		pthread_exit(NULL);
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
 	}
 	
 	// Crea el fichero
@@ -95,11 +100,44 @@ int set_value_server(int * sd) {
 		perror("");
 		pthread_exit(NULL);
 	}
-	
-	// Escribe los datos
-	char value1[256] = {"hola"};
-    int N = 1;
-    double value2[1] = {1};
+
+    // Recibir value1
+    char value1[256];
+    if (read_line(*sd, value1, 256) == -1) {
+        printf("Error: read_line incorrecto\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+    // Recibir N
+    int N;
+    if (read_line(*sd, buffer, 1024) == -1) {
+        printf("Error: read_line incorrecto\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+
+    N = atoi(buffer);
+    if (N == 0){
+        printf("Error: en atoi\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+
+    //Recibir value2
+    double value2[N];
+    for(int i; i<N; i ++){
+        if (read_line(*sd, buffer, 1024) == -1) {
+            printf("Error: read_line incorrecto\n");
+            write_line(*sd, "-1");
+            close(*sd);
+            pthread_exit((void*)-1);
+        }
+        value2[i] = strtod(buffer, NULL);
+    }
+
 	if (fprintf(tuple, "%d\n", key) < 0) {res = -1;}
 	if (fprintf(tuple, "%s\n", value1) < 0) {res = -1;}
 	if (fprintf(tuple, "%d\n", N) < 0) {res = -1;}
@@ -107,16 +145,36 @@ int set_value_server(int * sd) {
 		if (fprintf(tuple, "%lf", value2[i]) < 0) {res = -1;}
 		if (i < N -1) {fprintf(tuple, ", ");}
     }
-     
+
     // Cierra la tupla
     fclose(tuple);
-    
+
+    //Enviar menaje de repuesta
+    sprintf(buffer, "%i", res);
+    int r = write_line(*sd, buffer);
+    if (r == -1) {
+        printf("Error al enviar el resultado\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+    close(*sd);
     pthread_exit(NULL);
 }
 
 int get_value_server(int * sd) {
-	int res;
-	int key = 0;
+	int res = 0, key;
+    char buffer[1024];
+
+    // Recibir la key
+    if (read_line(*sd, buffer, 1024) == -1) {
+        printf("Error: read_line incorrecto\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+    key = atoi(buffer);
+
 	// Se consigue el path de la tupla
     char *tuple_name = calloc(PATH_MAX, sizeof(char));
     get_tuple_abs_path(tuple_name, key);
@@ -124,52 +182,89 @@ int get_value_server(int * sd) {
     // Se mira si existe
     if (access(tuple_name, F_OK) == -1) {
         printf("Archivo no existe\n");
-        pthread_exit(NULL);
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
     }
+    write_line(*sd,"0");
 
     // Abre el archivo
     FILE * tuple;
     tuple = fopen(tuple_name, "r");
     if (tuple == NULL) {
         perror("");
-        pthread_exit(NULL);
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
     }
 
     // Lee los datos
     char value1[256];
     int N;
     double value2[32];
-    
+
+    //Ley key
     if (fscanf(tuple, "%d\n", &key) < 1) {res = -1;}
+
+    //Ley value1
     if (fscanf(tuple, "%[^\n]s\n", value1) < 1) {res = -1;}
+    write_line(*sd, value1);
+
+    //Lee N
     if (fscanf(tuple, "%d\n", &N) < 1) {res = -1;}
+    sprintf(buffer, "%i", N);
+    write_line(*sd, buffer);
+
+    //Lee value2
     for (int i = 0; i < N; i++) {
         if (fscanf(tuple, "%lf", &value2[i]) < 1) {res = -1;}
+        sprintf(buffer, "%lf", value2[i]);
+        write_line(*sd, buffer);
         if (i < N -1) { fscanf(tuple, ", ");}
     }
 	if (N < 1 || N > 32){
 		res = -1;
 	}
   	
-    // Cierra la tupla
+    //Cierra la tupla
     fclose(tuple);
 
+    //Devuelve el mensaje de respuesta
+    sprintf(buffer, "%i", res);
+    int r = write_line(*sd, buffer);
+    if (r == -1) {
+        printf("Error al enviar el resultadado\n");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+    close(*sd);
     pthread_exit(NULL);
 }
 
 int modify_value_server(int * sd) {
-	int res;
-	int key = 0;
-	
-	// Se obtiene el nombre absoluto del fichero
+    int res = 0, key;
+    char buffer[1024];
+
+    // Recibir la key
+    if (read_line(*sd, buffer, 1024) == -1) {
+        printf("Error: read_line incorrecto\n");
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
+    }
+    key = atoi(buffer);
+
+
+    // Se obtiene el nombre absoluto del fichero
     char *tuple_name = calloc(PATH_MAX, sizeof(char));
     get_tuple_abs_path(tuple_name, key);
 
     // Se mira si existe
     if (access(tuple_name, F_OK) == -1) {
         printf("Archivo no existe\n");
-        res = -1;
-        pthread_exit(NULL);
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
     }
 
     // Crea el fichero
@@ -177,15 +272,16 @@ int modify_value_server(int * sd) {
     tuple = fopen(tuple_name, "w+");
     if (tuple == NULL) {
         perror("");
-        res = -1;
-        pthread_exit(NULL);
+        write_line(*sd, "-1");
+        close(*sd);
+        pthread_exit((void*)-1);
     }
 
     // Escribe los datos
     char value1[256] = {"hola"};
     int N = 1;
     double value2[1] = {1};
-    
+
     if (fprintf(tuple, "%d\n", key) < 0) {res = -1;}
     if (fprintf(tuple, "%s\n", value1) < 0) {res = -1;}
     if (fprintf(tuple, "%d\n", N) < 0) {res = -1;}
