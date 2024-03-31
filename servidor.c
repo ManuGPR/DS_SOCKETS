@@ -49,9 +49,10 @@ int receive_key(int sd) {
 }
 
 int init_server(int * nsd) {
-	// Declaración de variables necesarias para el init
-    int sd = sd_copy(*nsd);
+	// Variables para la conexión	
+	int sd = sd_copy(*nsd);
     
+	// Declaración de variables necesarias para el init
 	DIR *dir = opendir(abs_path);
 	struct dirent* tuplas;
 	char* file_name;
@@ -82,7 +83,7 @@ int init_server(int * nsd) {
 	
 	int r = write_line(sd, res);
 	if (r == -1) {
-		printf("Error al enviar la operación\n");
+		printf("Error: envio del resultado de init\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
@@ -107,14 +108,14 @@ int set_value_server(int * nsd) {
 	
 	// Se mira si existe
 	if (access(tuple_name, F_OK) == 0) {	
-		printf("Archivo existe\n");
+		printf("Error: Archivo existe\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
 	}
 	
 	// Mensaje de confirmación
-    write_line(sd,"0");
+    write_line(sd, "0");
 	
 	// Crea el fichero
 	FILE * tuple;
@@ -125,19 +126,19 @@ int set_value_server(int * nsd) {
 		pthread_exit((void*)-1);
 	}
 
-    // Recibir value1
+    // Recibe value1
     char value1[256];
     if (read_line(sd, value1, 256) == -1) {
-        printf("Error: read_line incorrecto\n");
+        printf("Error: read_line de set_value (value1) incorrecto\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
     }
     
-    // Recibir N
+    // Recibe N_value2
     int N;
     if (read_line(sd, buffer, 1024) == -1) {
-        printf("Error: read_line incorrecto\n");
+        printf("Error: read_line de set_value (N_value2) incorrecto\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
@@ -145,17 +146,17 @@ int set_value_server(int * nsd) {
 
     N = atoi(buffer);
     if (N == 0){
-        printf("Error: en atoi\n");
+        printf("Error: atoi en set_value\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
     }
 
-    // Recibir value2
+    // Recibe V_value2
     double value2[N];
     for(int i = 0; i<N; i ++){
         if (read_line(sd, buffer, 1024) == -1) {
-            printf("Error: read_line incorrecto\n");
+            printf("Error: read_line de set_value (V_value2) incorrecto\n");
             write_line(sd, "-1");
             close(sd);
             pthread_exit((void*)-1);
@@ -178,7 +179,7 @@ int set_value_server(int * nsd) {
     sprintf(buffer, "%i", res);
     int r = write_line(sd, buffer);
     if (r == -1) {
-        printf("Error al enviar el resultado\n");
+        printf("Error: envio del resultado de set_value\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
@@ -189,6 +190,7 @@ int set_value_server(int * nsd) {
 }
 
 int get_value_server(int * nsd) {
+	// Variables para la conexión   
     int sd = sd_copy(*nsd);
 	int res = 0;
     char buffer[1024];
@@ -202,14 +204,14 @@ int get_value_server(int * nsd) {
     
     // Se mira si existe
     if (access(tuple_name, F_OK) == -1) {
-        printf("Archivo no existe\n");
+        printf("Error: Archivo no existe\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
     }
     
     // Mensaje de confirmación
-    write_line(sd,"0");
+    write_line(sd, "0");
 
     // Abre el archivo
     FILE * tuple;
@@ -226,42 +228,53 @@ int get_value_server(int * nsd) {
     int N;
     double value2[32];
     
-    //Ley key
+    // Ley la key
     if (fscanf(tuple, "%d\n", &key) < 1) {res = -1;}
 
-    //Ley value1
-    if (fscanf(tuple, "%[^\n]s\n", value1) < 1) {res = -1;}
+    // Lee value1 y lo manda por el socket
+    if (fscanf(tuple, "%[^\n]s\n", value1) < 1) {
+    	printf("Error: lectura de value1 de get_value\n");	
+    	write_line(sd, "-1");
+		close(sd);
+		pthread_exit((void *)-1);
+    }
     write_line(sd, value1);
 
-    //Lee N
-    if (fscanf(tuple, "%d\n", &N) < 1) {res = -1;}
-    if(N > 32 || N<= 0){
+    // Lee N_value2 y lo manda por el socket
+    if (fscanf(tuple, "%d\n", &N) < 1) {
+    	printf("Error: lectura de N_value2 de get_value\n");
+    	write_line(sd, "-1");
+    	close(sd);
+    	pthread_exit((void *)-1);
+    }
+    
+    else if (N > 32 || N<= 0){
+    	printf("Error: N_value2 fuera de rango\n");
         write_line(sd, "-1");
+    	close(sd);
+    	pthread_exit((void *)-1);
     }
     else{
         sprintf(buffer, "%i", N);
-        write_line(sd, buffer);
+		write_line(sd, buffer);
     }
 
-    //Lee value2
+    // Lee V_value2 y lo manda por el socket
     for (int i = 0; i < N; i++) {
         if (fscanf(tuple, "%lf", &value2[i]) < 1) {res = -1;}
         sprintf(buffer, "%lf", value2[i]);
         write_line(sd, buffer);
         if (i < N -1) { fscanf(tuple, ", ");}
     }
-	if (N < 1 || N > 32){
-		res = -1;
-	}
   	
-    //Cierra la tupla
+    // Cierra la tupla
     fclose(tuple);
 
-    //Devuelve el mensaje de respuesta
+    // Devuelve el mensaje de respuesta
     sprintf(buffer, "%i", res);
     int r = write_line(sd, buffer);
     if (r == -1) {
-        printf("Error al enviar el resultadado\n");
+        printf("Error: envio del resultado de get_value\n");
         close(sd);
         pthread_exit((void*)-1);
     }
@@ -270,6 +283,7 @@ int get_value_server(int * nsd) {
 }
 
 int modify_value_server(int * nsd) {
+	// Variables para la conexión    
     int sd = sd_copy(*nsd);
     int res = 0;
     char buffer[1024];
@@ -277,14 +291,13 @@ int modify_value_server(int * nsd) {
     // Se consigue la key
     int key = receive_key(sd);
 
-
     // Se obtiene el nombre absoluto del fichero
     char *tuple_name = calloc(PATH_MAX, sizeof(char));
     get_tuple_abs_path(tuple_name, key);
 
     // Se mira si existe
     if (access(tuple_name, F_OK) == -1) {
-        printf("Archivo no existe\n");
+        printf("Error: Archivo no existe\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
@@ -303,19 +316,19 @@ int modify_value_server(int * nsd) {
         pthread_exit((void*)-1);
     }
 
-    // Recibir value1
+    // Recibe value1
     char value1[256];
     if (read_line(sd, value1, 256) == -1) {
-        printf("Error: read_line incorrecto\n");
+        printf("Error: read_line de modify_value (value1) incorrecto\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
     }
 
-    // Recibir N
+    // Recibe N_value2
     int N;
     if (read_line(sd, buffer, 1024) == -1) {
-        printf("Error: read_line incorrecto\n");
+        printf("Error: read_line de modify_value (N_value2) incorrecto\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
@@ -323,17 +336,17 @@ int modify_value_server(int * nsd) {
 
     N = atoi(buffer);
     if (N == 0){
-        printf("Error: en atoi\n");
+        printf("Error: atoi de modify_value\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
     }
 
-    // Recibir value2
+    // Recibir V_value2
     double value2[N];
     for(int i = 0; i<N; i ++){
         if (read_line(sd, buffer, 1024) == -1) {
-            printf("Error: read_line incorrecto\n");
+            printf("Error: read_line de modify_value (V_value2) incorrecto\n");
             write_line(sd, "-1");
             close(sd);
             pthread_exit((void*)-1);
@@ -356,7 +369,7 @@ int modify_value_server(int * nsd) {
     sprintf(buffer, "%i", res);
     int r = write_line(sd, buffer);
     if (r == -1) {
-        printf("Error al enviar el resultado\n");
+        printf("Error: envio del resultado de modify_value\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
@@ -367,6 +380,7 @@ int modify_value_server(int * nsd) {
 }
 
 int delete_key_server(int * nsd) {
+	// Variables para la conexión
     int sd = sd_copy(*nsd);
     int res = 0;
     char buffer[1024];
@@ -407,7 +421,7 @@ int delete_key_server(int * nsd) {
 		}
    	}
    	else {
-   		printf("El fichero no existe\n");
+   		printf("Error: el fichero no existe\n");
    		res = -1;
    	}
 
@@ -415,7 +429,7 @@ int delete_key_server(int * nsd) {
     sprintf(buffer, "%i", res);
     int r = write_line(sd, buffer);
     if (r == -1) {
-        printf("Error al enviar el resultado\n");
+        printf("Error: envio del resultado de remove_key\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
@@ -426,6 +440,7 @@ int delete_key_server(int * nsd) {
 }
 
 int exist_server(int * nsd) {
+	// Variables para la conexión
     int sd = sd_copy(*nsd);
     int res = 0;
     char buffer[1024];
@@ -448,11 +463,12 @@ int exist_server(int * nsd) {
             res = -1;
         }
     }
-    //Enviar menaje de repuesta
+    
+    // Enviar menaje de repuesta
     sprintf(buffer, "%i", res);
     int r = write_line(sd, buffer);
     if (r == -1) {
-        printf("Error al enviar el resultado\n");
+        printf("Error: envio del resultado de exist\n");
         write_line(sd, "-1");
         close(sd);
         pthread_exit((void*)-1);
@@ -465,7 +481,7 @@ int exist_server(int * nsd) {
 int main(int argc, char **argv) {
 	// Se comprueba el número de args
 	if (argc != 2) {
-		printf("Error: Puerto sin especificar\n");
+		printf("Error: Puerto del servidor sin especificar\n");
 		return -1;
 	}
 	
@@ -486,6 +502,9 @@ int main(int argc, char **argv) {
 
 	// Creación del socket del servidor
 	int socket_server = create_server_socket(puerto, SOCK_STREAM);
+	if (socket_server < 0) {
+		return -1;
+	}
 	char buffer[4];
 	int new_sd;
 	
@@ -493,36 +512,45 @@ int main(int argc, char **argv) {
 	char op;
 	while(1) {
 		new_sd = accept_server(socket_server);
-		if (read_line(new_sd, buffer, 4) == -1) {
-			printf("Error: receive message\n");
-			return -1;
-		}
 		
-		op = buffer[0];
-		printf("Conexión aceptada: procesando petición con id %c\n", op);
-		
-		pthread_t thread;
-		// Llamada a las funciones
-		switch(op) {
-			case '1': pthread_create(&thread, &attr_thr, (void*)init_server, (void*)&new_sd);
-				break;
-			case '2': pthread_create(&thread, &attr_thr, (void*)set_value_server, (void*)&new_sd);
-				break;
-			case '3': pthread_create(&thread, &attr_thr, (void*)get_value_server, (void*)&new_sd);
-				break;
-			case '4': pthread_create(&thread, &attr_thr, (void*)modify_value_server, (void*)&new_sd);
-				break;
-			case '5': pthread_create(&thread, &attr_thr, (void*)delete_key_server, (void*)&new_sd);
-				break;
-			case '6': pthread_create(&thread, &attr_thr, (void*)exist_server, (void*)&new_sd);
-				break;
+		// Si se acepta correctamente la petición
+		if (new_sd >= 0) {
+			
+			if (read_line(new_sd, buffer, 4) == -1) {
+				printf("Error: no se lee la operación\n");
+				close(new_sd);
+			}
+			
+			// Si se lee bien la operación
+			else {
+			
+				op = buffer[0];
+				printf("Conexión aceptada: procesando petición con id %c\n", op);
+				
+				pthread_t thread;
+				// Llamada a las funciones
+				switch(op) {
+					case '1': pthread_create(&thread, &attr_thr, (void*)init_server, (void*)&new_sd);
+						break;
+					case '2': pthread_create(&thread, &attr_thr, (void*)set_value_server, (void*)&new_sd);
+						break;
+					case '3': pthread_create(&thread, &attr_thr, (void*)get_value_server, (void*)&new_sd);
+						break;
+					case '4': pthread_create(&thread, &attr_thr, (void*)modify_value_server, (void*)&new_sd);
+						break;
+					case '5': pthread_create(&thread, &attr_thr, (void*)delete_key_server, (void*)&new_sd);
+						break;
+					case '6': pthread_create(&thread, &attr_thr, (void*)exist_server, (void*)&new_sd);
+						break;
+				}
+				pthread_mutex_lock(&mutex);
+				while (copia == 0){
+					pthread_cond_wait(&copiado, &mutex);
+				}
+				copia = 0;
+				pthread_mutex_unlock(&mutex);
+			}
 		}
-        pthread_mutex_lock(&mutex);
-        while (copia == 0){
-            pthread_cond_wait(&copiado, &mutex);
-        }
-        copia = 0;
-        pthread_mutex_unlock(&mutex);
 	}
 	return 0;
 }

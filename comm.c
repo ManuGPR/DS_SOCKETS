@@ -39,6 +39,7 @@ int create_server_socket(int port, int type) {
 		printf("Error en el listen del socket del servidor\n");
 		return -1;
 	}
+	
 	printf("Servidor conectado, esperando conexiones\n");
 	return sd;
 }
@@ -50,7 +51,6 @@ int create_client_socket(char * remote, int port) {
 	
 	sd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sd < 0) {
-		printf("Error en la creación del socket del cliente\n");
 		return -1;
 	}
 	
