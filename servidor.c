@@ -36,9 +36,22 @@ void get_tuple_abs_path(char * tuple_name, int key) {
     strcat(tuple_name, key_str);
 }
 
+int receive_key(int sd) {
+	// Función auxiliar que recibe la key
+    char buffer[1024];
+    if (read_line(sd, buffer, 1024) == -1) {
+        printf("Error: read_line incorrecto\n");
+        write_line(sd, "-1");
+        close(sd);
+        pthread_exit((void*)-1);
+    }
+    return atoi(buffer);
+}
+
 int init_server(int * nsd) {
-    int sd = sd_copy(*nsd);
 	// Declaración de variables necesarias para el init
+    int sd = sd_copy(*nsd);
+    
 	DIR *dir = opendir(abs_path);
 	struct dirent* tuplas;
 	char* file_name;
@@ -80,18 +93,13 @@ int init_server(int * nsd) {
 }
 
 int set_value_server(int * nsd) {
+	// Variables para la conexión
     int sd = sd_copy(*nsd);
-	int res = 0, key;
+	int res = 0;
     char buffer[1024];
 
-    // Recibir la key
-    if (read_line(sd, buffer, 1024) == -1) {
-        printf("Error: read_line incorrecto\n");
-        write_line(sd, "-1");
-        close(sd);
-        pthread_exit((void*)-1);
-    }
-    key = atoi(buffer);
+	// Se obtiene la key
+	int key = receive_key(sd);
 
 	// Se obtiene el nombre absoluto del fichero
 	char *tuple_name = calloc(PATH_MAX, sizeof(char));
@@ -182,17 +190,11 @@ int set_value_server(int * nsd) {
 
 int get_value_server(int * nsd) {
     int sd = sd_copy(*nsd);
-	int res = 0, key;
+	int res = 0;
     char buffer[1024];
 
-    // Recibir la key
-    if (read_line(sd, buffer, 1024) == -1) {
-        printf("Error: read_line incorrecto\n");
-        write_line(sd, "-1");
-        close(sd);
-        pthread_exit((void*)-1);
-    }
-    key = atoi(buffer);
+    // Se obtiene la key
+    int key = receive_key(sd);
 
 	// Se consigue el path de la tupla
     char *tuple_name = calloc(PATH_MAX, sizeof(char));
@@ -269,17 +271,11 @@ int get_value_server(int * nsd) {
 
 int modify_value_server(int * nsd) {
     int sd = sd_copy(*nsd);
-    int res = 0, key;
+    int res = 0;
     char buffer[1024];
 
-    // Recibir la key
-    if (read_line(sd, buffer, 1024) == -1) {
-        printf("Error: read_line incorrecto\n");
-        write_line(sd, "-1");
-        close(sd);
-        pthread_exit((void*)-1);
-    }
-    key = atoi(buffer);
+    // Se consigue la key
+    int key = receive_key(sd);
 
 
     // Se obtiene el nombre absoluto del fichero
@@ -372,17 +368,11 @@ int modify_value_server(int * nsd) {
 
 int delete_key_server(int * nsd) {
     int sd = sd_copy(*nsd);
-    int res = 0, key;
+    int res = 0;
     char buffer[1024];
 
-    // Recibir la key
-    if (read_line(sd, buffer, 1024) == -1) {
-        printf("Error: read_line incorrecto\n");
-        write_line(sd, "-1");
-        close(sd);
-        pthread_exit((void*)-1);
-    }
-    key = atoi(buffer);
+    // Se obtiene la key
+    int key = receive_key(sd);
 	
 	// Declaración de variables necesarias para el delete key
     DIR *dir = opendir(abs_path);
@@ -437,17 +427,11 @@ int delete_key_server(int * nsd) {
 
 int exist_server(int * nsd) {
     int sd = sd_copy(*nsd);
-    int res = 0, key;
+    int res = 0;
     char buffer[1024];
 
-    // Recibir la key
-    if (read_line(sd, buffer, 1024) == -1) {
-        printf("Error: read_line incorrecto\n");
-        write_line(sd, "-1");
-        close(sd);
-        pthread_exit((void*)-1);
-    }
-    key = atoi(buffer);
+    // Se obtiene la key
+    int key = receive_key(sd);
 	
 	// Datos para el fichero
     char *tuple_name = calloc(PATH_MAX, sizeof(char));
@@ -491,19 +475,6 @@ int main(int argc, char **argv) {
 		printf("Error: mal puerto\n");
 		return -1;
 	}
-	
-	/*// Se guarda el puerto en una env
-	if (setenv("PORT_TUPLAS", argv[1], 1) == -1) {
-		printf("Error: setenv puerto\n");
-		return -1;
-	}
-	
-	// Se guarda la IP en una env
-	if (setenv("IP_TUPLAS", "a", 1) == -1) {
-		printf("Error: setenv puerto\n");
-		return -1;
-	}*/
-	
 
 	// Se crean los attr de los threads
 	pthread_attr_t attr_thr;
@@ -513,13 +484,13 @@ int main(int argc, char **argv) {
 	// Se le da valor al path de las tuplas
 	abs_path = realpath(rel_path, NULL);
 
-	// Bucle de espera a las peticiones
-	char op;
-	
 	// Creación del socket del servidor
 	int socket_server = create_server_socket(puerto, SOCK_STREAM);
 	char buffer[4];
 	int new_sd;
+	
+	// Bucle de espera a las peticiones
+	char op;
 	while(1) {
 		new_sd = accept_server(socket_server);
 		if (read_line(new_sd, buffer, 4) == -1) {
@@ -528,6 +499,7 @@ int main(int argc, char **argv) {
 		}
 		
 		op = buffer[0];
+		printf("Conexión aceptada: procesando petición con id %c\n", op);
 		
 		pthread_t thread;
 		// Llamada a las funciones

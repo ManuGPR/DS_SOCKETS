@@ -39,7 +39,7 @@ int create_server_socket(int port, int type) {
 		printf("Error en el listen del socket del servidor\n");
 		return -1;
 	}
-	
+	printf("Servidor conectado, esperando conexiones\n");
 	return sd;
 }
 
@@ -78,8 +78,6 @@ int accept_server(int sd) {
 	int sc;
 	struct sockaddr_in addr_client;
 	socklen_t size = sizeof(addr_client);
-	
-	printf("esperando conexión\n");
 
 	sc = accept(sd, (struct sockaddr *)&addr_client, (socklen_t *)&size); 
 	if (sc < 0) {

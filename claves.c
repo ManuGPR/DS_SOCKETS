@@ -211,6 +211,7 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
         return -1;
     }
     if (strcmp(r, "0")== 0){
+    
         //Recibe value 1
         res = read_line(sd, value1, 1024);
         if (res == -1) {
