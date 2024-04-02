@@ -78,7 +78,7 @@ int main(){
     printf("Test 1: todo correcto\n");
 
     print_files(abs_path);
-    printf("Los datos que ha en el archivo creado: \n");
+    printf("Los datos que hay en el archivo creado: \n");
     leer_fichero(abs_path, k);
 
     //Se modifica el archivo
@@ -88,7 +88,7 @@ int main(){
     printf("Resultado prueba 1: %d\n", modify);
 
     print_files(abs_path);
-    printf("Los datos que ha en el archivo modificado: \n");
+    printf("Los datos que hay en el archivo modificado: \n");
     leer_fichero(abs_path, k);
 	free(vector);
 
@@ -110,7 +110,7 @@ int main(){
     vector = calloc(n, sizeof(double));
     for (int i = 0; i < n; i++) { vector[i] = (double) i; }
     set_value(k, "archivo", n, vector);
-    printf("Los datos que ha en el archivo creado: \n");
+    printf("Los datos que hay en el archivo creado: \n");
     leer_fichero(abs_path, k);
 	free(vector);
     //Se modifica el archivo
@@ -124,6 +124,11 @@ int main(){
 
     /*Test4: Modifica el archivo*/
     printf("\nTest 4: N = 32\n");
+    
+    //Fichero antes de la modificación
+    printf("Los datos del fichero\n");
+    leer_fichero(abs_path, k);
+    
     //Se modifica el archivo
     n = 32;
     vector = calloc(n, sizeof(double));
@@ -131,6 +136,10 @@ int main(){
     modify = modify_value(k, "archivo_cambiado", n , vector);
     printf("Resultado prueba 4: %d\n", modify);
 	free(vector);
+
+	// Fichero después de la modificación
+	printf("Los datos del fichero\n");
+	leer_fichero(abs_path, k);
 
     /*Test 5: Modifica el archivo*/
     printf("\nTest 5: N = 33\n");

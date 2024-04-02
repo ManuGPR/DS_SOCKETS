@@ -59,7 +59,7 @@ int init() {
 
 int set_value(int key, char *value1, int N_value2, double *V_value2){
     //Función set_value que manda el mensaje de set_value al servidor
-    if (N_value2 <= 32 && N_value2 >= 1) {
+    if (N_value2 <= 32 && N_value2 >= 1 && strlen(value1) < 256) {
         int sd, res;
         char *ip_tuplas = getenv("IP_TUPLAS");
         if (ip_tuplas == NULL) {
@@ -279,7 +279,7 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
 
 int modify_value(int key, char *value1, int N_value2, double *V_value2){
     //Función modify_value que manda el mensaje de modify_value al servidor
-    if (N_value2 <= 32 && N_value2 >= 1) {
+    if (N_value2 <= 32 && N_value2 >= 1 && strlen(value1) < 256) {
         int sd, res;
         char *ip_tuplas = getenv("IP_TUPLAS");
         if (ip_tuplas == NULL) {

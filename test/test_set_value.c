@@ -34,7 +34,7 @@ int leer_fichero(char *abs_path, int k){
     // Abre el archivo en modo lectura
     archivo = fopen(nombre_archivo, "r");
     if(archivo == NULL){
-        printf("Error al abrir el fichro");
+        printf("Error al abrir el fichero\n");
         return -1;
     }
 
@@ -68,19 +68,19 @@ int main() {
     init();
     
     /*Test 1: Crea un archivo */
-    printf("Test 1: funcionamiento para N = 2\n");
+    printf("Test 1: funcionamiento para N = 1\n");
     print_files(abs_path);
     int n = 1;
     int k = 1;
     double *vector = calloc(n, sizeof(double));
     for (int i = 0; i < n; i++) { vector[i] = (double) i; }
     set = set_value(k, "prueba_1", n, vector);
-    printf("Resultado prueba 1: %d\n", set);
+    printf("Resultado prueba 1 (todo bien): %d\n", set);
     print_files(abs_path);
     if (set == 0){leer_fichero(abs_path, k);}
 	free(vector);
 	
-    /*Test 2: ya exite la key*/
+    /*Test 2: ya existe la key*/
     printf("\nTest 2: key ya existe\n");
     print_files(abs_path);
     n = 1;
@@ -89,7 +89,7 @@ int main() {
 
     for (int i = 0; i < n; i++) { vector[i] = (double) i; }
     set = set_value(k, "prueba_2", n, vector);
-    printf("Resultado prueba 2: %d\n", set);
+    printf("Resultado prueba 2 (key existe): %d\n", set);
     print_files(abs_path);
     if (set == 0){ leer_fichero(abs_path, k);}
     free(vector);

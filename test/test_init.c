@@ -9,7 +9,7 @@ int print_files(char *abs_path){
     //Imprime por pantalla los archivos que hay en el directorio tuplas
     DIR *dir = opendir(abs_path);
     struct dirent *tuplas;
-    printf("En el directorio tuplas hay los siguientes archivos:  ");
+    printf("En el directorio tuplas hay los siguientes archivos: ");
     while ((tuplas = readdir(dir)) != NULL){
         printf("%s ",tuplas->d_name);
     }
@@ -32,7 +32,7 @@ int main() {
 	printf("=========Test de init=========\n");
 
     /*Test 1: No hay ningún archivo en la carpeta tuplas donde se enciantran las keys*/
-	printf("Test 1: No hay ningun archivo en la carpeta tuplas \n");
+	printf("Test 1: No hay ningún archivo en la carpeta tuplas\n");
 
     //Se borran los archivos y comprueba si los a borrado
     in = init();

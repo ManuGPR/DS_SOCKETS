@@ -34,40 +34,12 @@ int leer_fichero(char *abs_path, int k){
     // Abre el archivo en modo lectura
     archivo = fopen(nombre_archivo, "r");
     if(archivo == NULL){
-        printf("Error al abrir el fichro");
+        printf("Error al abrir el fichero\n");
         return -1;
     }
 
     // Lee y muestra cada caracter del archivo
     char linea[500];
-    /*
-    int key;
-    fscanf(tuple, "%d\n", &key)  ;
-    printf("K: %d\n", key);
-    fscanf(tuple, "%[^\n]s\n", &linea);
-    printf("Value1: %s\n", linea);
-    fscanf(tuple, "%d\n", )
-    printf("3\n");
-    for (int i = 0; i < r.N_or_exists; i++) {
-        if (fscanf(tuple, "%lf", &r.V_value2[i]) < 1) {printf("4\n");r.res = -1;}
-        if (i < r.N_or_exists -1) { fscanf(tuple, ", ");}
-    }
-    if (r.N_or_exists < 1 || r.N_or_exists > 32){
-        r.res = -1;
-    }
-
-
-    gets(linea, sizeof(linea), archivo);
-    printf("K: %s\n", linea);
-
-    fscanf()
-
-    fgets(linea, sizeof(linea), archivo);
-    //printf("Value1: %s\n", linea);
-    fgets(linea, sizeof(linea), archivo);
-    //printf("N: %s\n", linea);
-    printf("Value2: ");
-     */
     while(fgets(linea, sizeof(linea), archivo) !=NULL){
         printf("%s\n", linea);
     }
@@ -99,7 +71,6 @@ int escribir_fichero(char *abs_path, int k, int N, char *value1, double *value2)
         printf("Error al abrir el fichero\n");
         return -1;
     }
-    //printf("%i\n",);
 
     if (fprintf(archivo, "%d\n", k) < 0) {return -1;}
     if (fprintf(archivo, "%s\n", value1) < 0) {return -1;}

@@ -11,15 +11,17 @@
 #define PATH_MAX 4096
 #define cero 0
 
+// Paths
 const char *rel_path="./tuplas";
 char *abs_path;
 
+// Mutex para la copia del socket
 pthread_mutex_t mutex;
-pthread_mutex_t a;
 pthread_cond_t copiado;
 int copia = 0;
 
 int sd_copy(int sd){
+	// Función auxiliar que copia el socket y lo devuelve  
     pthread_mutex_lock(&mutex);
     copia = 1;
     pthread_cond_signal(&copiado);
@@ -342,7 +344,7 @@ int modify_value_server(int * nsd) {
         pthread_exit((void*)-1);
     }
 
-    // Recibir V_value2
+    // Recibe V_value2
     double value2[N];
     for(int i = 0; i<N; i ++){
         if (read_line(sd, buffer, 1024) == -1) {
