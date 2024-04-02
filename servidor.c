@@ -45,7 +45,7 @@ int receive_key(int sd) {
         printf("Error: read_line incorrecto\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
     return atoi(buffer);
 }
@@ -88,7 +88,7 @@ int init_server(int * nsd) {
 		printf("Error: envio del resultado de init\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
 	}
 
 	close(sd);
@@ -113,7 +113,7 @@ int set_value_server(int * nsd) {
 		printf("Error: Archivo existe\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
 	}
 	
 	// Mensaje de confirmación
@@ -125,7 +125,7 @@ int set_value_server(int * nsd) {
 	if (tuple == NULL) {
 		perror("");
 		close(sd);
-		pthread_exit((void*)-1);
+		pthread_exit(NULL);
 	}
 
     // Recibe value1
@@ -134,7 +134,7 @@ int set_value_server(int * nsd) {
         printf("Error: read_line de set_value (value1) incorrecto\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
     
     // Recibe N_value2
@@ -143,7 +143,7 @@ int set_value_server(int * nsd) {
         printf("Error: read_line de set_value (N_value2) incorrecto\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
 
     N = atoi(buffer);
@@ -151,7 +151,7 @@ int set_value_server(int * nsd) {
         printf("Error: atoi en set_value\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
 
     // Recibe V_value2
@@ -161,7 +161,7 @@ int set_value_server(int * nsd) {
             printf("Error: read_line de set_value (V_value2) incorrecto\n");
             write_line(sd, "-1");
             close(sd);
-            pthread_exit((void*)-1);
+            pthread_exit(NULL);
         }
         value2[i] = strtod(buffer, NULL);
     }
@@ -184,7 +184,7 @@ int set_value_server(int * nsd) {
         printf("Error: envio del resultado de set_value\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
     
     close(sd);
@@ -209,7 +209,7 @@ int get_value_server(int * nsd) {
         printf("Error: Archivo no existe\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
     
     // Mensaje de confirmación
@@ -222,7 +222,7 @@ int get_value_server(int * nsd) {
         perror("");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
 
     // Lee los datos
@@ -238,7 +238,7 @@ int get_value_server(int * nsd) {
     	printf("Error: lectura de value1 de get_value\n");	
     	write_line(sd, "-1");
 		close(sd);
-		pthread_exit((void *)-1);
+		pthread_exit(NULL);
     }
     write_line(sd, value1);
 
@@ -247,14 +247,14 @@ int get_value_server(int * nsd) {
     	printf("Error: lectura de N_value2 de get_value\n");
     	write_line(sd, "-1");
     	close(sd);
-    	pthread_exit((void *)-1);
+    	pthread_exit(NULL);
     }
     
     else if (N > 32 || N<= 0){
     	printf("Error: N_value2 fuera de rango\n");
         write_line(sd, "-1");
     	close(sd);
-    	pthread_exit((void *)-1);
+    	pthread_exit(NULL);
     }
     else{
         sprintf(buffer, "%i", N);
@@ -278,7 +278,7 @@ int get_value_server(int * nsd) {
     if (r == -1) {
         printf("Error: envio del resultado de get_value\n");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
     close(sd);
     pthread_exit(NULL);
@@ -302,7 +302,7 @@ int modify_value_server(int * nsd) {
         printf("Error: Archivo no existe\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
 	
 	// Mensaje de confirmación
@@ -315,7 +315,7 @@ int modify_value_server(int * nsd) {
         perror("");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
 
     // Recibe value1
@@ -324,7 +324,7 @@ int modify_value_server(int * nsd) {
         printf("Error: read_line de modify_value (value1) incorrecto\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
 
     // Recibe N_value2
@@ -333,7 +333,7 @@ int modify_value_server(int * nsd) {
         printf("Error: read_line de modify_value (N_value2) incorrecto\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
 
     N = atoi(buffer);
@@ -341,7 +341,7 @@ int modify_value_server(int * nsd) {
         printf("Error: atoi de modify_value\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
 
     // Recibe V_value2
@@ -351,7 +351,7 @@ int modify_value_server(int * nsd) {
             printf("Error: read_line de modify_value (V_value2) incorrecto\n");
             write_line(sd, "-1");
             close(sd);
-            pthread_exit((void*)-1);
+            pthread_exit(NULL);
         }
         value2[i] = strtod(buffer, NULL);
     }
@@ -374,7 +374,7 @@ int modify_value_server(int * nsd) {
         printf("Error: envio del resultado de modify_value\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
     close(sd);
 
@@ -434,7 +434,7 @@ int delete_key_server(int * nsd) {
         printf("Error: envio del resultado de remove_key\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
     close(sd);
 
@@ -473,7 +473,7 @@ int exist_server(int * nsd) {
         printf("Error: envio del resultado de exist\n");
         write_line(sd, "-1");
         close(sd);
-        pthread_exit((void*)-1);
+        pthread_exit(NULL);
     }
     close(sd);
 
