@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <dirent.h>
 
+char *abs_path;
+
 int print_files(char *abs_path) {
     //Imprime por pantalla los archivos que hay en el directorio tuplas
     DIR *dir = opendir(abs_path);
@@ -16,38 +18,43 @@ int print_files(char *abs_path) {
     return 0;
 }
 
+void test_1(int k) {
+	// Test 1: funcionamiento corecto
+    printf("Test 1: todo correcto\n");
+    print_files(abs_path);
 
+    //Se borra el archvo
+    int delete = delete_key(k);
+    printf("Resultado prueba 1: %d\n", delete);
+    print_files(abs_path);
+}
+
+void test_2(int k) {
+	// Test 2: fichero no existe 
+	printf("\nTest 2: no existe ninguna clave\n");
+    
+    //Se borran los archivos
+    int delete = delete_key(k);
+    printf("Resultado prueba 2: %d\n", delete);
+}
 
 int main(){
-    printf("\n=========Test de delete_key=========\n");
-
-    //Se obtine la path del diretorio tuplas donde estan almacanadas las key y se abre el directorio
+    // Se obtiene el path del diretorio tuplas donde estan almacanadas las key y se abre el directorio
     const char *rel_path = "./tuplas";
-    char *abs_path;
     abs_path = realpath(rel_path, NULL);
 
-    //Declaracion de variables
-    int delete;
+    // Declaracion de variables
     int n = 1;
     double vector[n];
     int k = 1;
 
-    //Se borran todos lor archivos y se crea un archivo
+    // Se borran todos lor archivos y se crea un archivo
     init();
     for (int i = 0; i < n; i++) { vector[i] = (double) i; }
     set_value(k, "archivo", n, vector);
 
-    /*Test 1: funcionamiento corecto*/
-    printf("Test 1: todo correcto\n");
-
-    print_files(abs_path);
-
-    //Se borrael archvo
-    delete = delete_key(k);
-    printf("Resultado prueba 1: %d\n", delete);
-    print_files(abs_path);
-    printf("\nTest 2: no existe ninguna clave\n");
-    //Se borran los archivos
-    delete = delete_key(k);
-    printf("Resultado prueba 2: %d\n", delete);
+	// Llamada a los test
+	test_1(k);
+    test_2(k);
+    return 0;
 }

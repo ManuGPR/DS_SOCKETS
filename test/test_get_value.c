@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <dirent.h>
 
+char *abs_path;
+
 int print_files(char *abs_path) {
     //Imprime por pantalla los archivos que hay en el directorio tuplas
     DIR *dir = opendir(abs_path);
@@ -17,10 +19,9 @@ int print_files(char *abs_path) {
 }
 
 int leer_fichero(char *abs_path, int k){
-
     // Escribe los datos
     FILE *archivo;
-    //char caracter[10];
+    
     char number[20];
     sprintf(number, "%i",k);
 
@@ -44,7 +45,6 @@ int leer_fichero(char *abs_path, int k){
         printf("%s\n", linea);
     }
 
-
     // Cierra el archivo
     fclose(archivo);
     printf("\n");
@@ -52,9 +52,9 @@ int leer_fichero(char *abs_path, int k){
 }
 
 int escribir_fichero(char *abs_path, int k, int N, char *value1, double *value2){
+    
     // Escribe los datos
     FILE *archivo;
-    //char caracter[10];
     char number[20];
     sprintf(number, "%i",k);
 
@@ -87,42 +87,30 @@ int escribir_fichero(char *abs_path, int k, int N, char *value1, double *value2)
 
 }
 
-int main(){
-    printf("\n=========Test de get_value=========\n");
-    //Declaración de variables
-    int N;
-    double v2[32];
-    char v1[256];
-    int  get;
-    int n;
-    double vector[64];
-    int k;
-
-
-    //Se obtine la path del diretorio tuplas donde estan almacanadas las key y se abre el directorio
-    const char *rel_path = "./tuplas";
-    char *abs_path;
-    abs_path = realpath(rel_path, NULL);
-
-    /*Test 1: funcionamiento corecto*/
+void test_1() {
+	/*Test 1: funcionamiento corecto*/
     printf("Test 1: todo correcto\n");
 
     //Se borran todos lor archivos y se crea un archivo
     init();
-    n = 2;
-    k = 1;
+    
+    int n = 2;
+    int k = 1;
+    double vector[64];
+    int N;
+    double v2[32];
+    char v1[256];
+    
     for (int i = 0; i < n; i++) { vector[i] = (double) i;}
 
     set_value(k, "archivo", n, vector);
-
-
 
     print_files(abs_path);
     printf("Los datos que hay en el archivo creado: \n");
     leer_fichero(abs_path, k);
 
     //Se obtine el resultado
-    get = get_value(1, v1, &N , v2);
+    int get = get_value(1, v1, &N , v2);
     printf("Resultado prueba 1: %d\n", get);
 
     printf("Los datos que se han obtenido son:\n");
@@ -134,37 +122,61 @@ int main(){
         printf("%lf\n", v2[i]);
     }
 
-    /*Test 2: no existe ninguna clave*/
+}
+
+void test_2() {
+	/*Test 2: no existe ninguna clave*/
     printf("\nTest 2: no existe ninguna clave\n");
 
     //Se borran los archivos
     init();
-
-    get = get_value(k, v1, &N , v2);
+    
+    int k = 1;
+    int N;
+    double v2[32];
+    char v1[256];
+    
+    int get = get_value(k, v1, &N , v2);
     printf("Resultado prueba 2: %d\n", get);
+}
 
-    /*Test 3: N = 33*/
+void test_3() {
+	/*Test 3: N = 33*/
     printf("\nTest 3: N > 32 \n");
-    k = 3;
-    n = 33;
+    
+    int k = 3;
+    int n = 33;
+    double vector[64];
+    int N;
+    double v2[32];
+    char v1[256];
+    
     for (int i = 0; i < n; i++) { vector[i] = (double) i; }
+    //Crear un fichero a mano de N = 33
     escribir_fichero(abs_path, k, n, "prueba 3", vector);
     leer_fichero(abs_path,k);
-    get = get_value(k, v1, &N , v2);
+    int get = get_value(k, v1, &N , v2);
     printf("Resultado prueba 3: %d\n", get);
+}
 
-    //Crear un fichero a mano de N = 33
+void test_4() {
+	/*Test 4: len(value1) > 255*/
     printf("\nTest 4: len(value1) > 255\n");
     init();
 
     char cadena[300];
-    n = 1;
-    k = 2;
+    int n = 1;
+    int k = 2;
+    double vector[64];
+    int N;
+    double v2[32];
+    char v1[256];
+    
     for (int i = 0; i < 50; i++){ strcat(cadena, "prueba");}
     for (int i = 0; i < n; i++) { vector[i] = (double) i; }
     escribir_fichero(abs_path, k, n, cadena, vector);
     leer_fichero(abs_path,k);
-    get = get_value(k, v1, &N , v2);
+    int get = get_value(k, v1, &N , v2);
     printf("Resultado prueba 4: %d\n", get);
     printf("Los datos que se han obtenido son:\n");
     printf("K: %i\n", k);
@@ -174,4 +186,17 @@ int main(){
     for(int i = 0; i < N; i++){
         printf("%lf\n", v2[i]);
     }
+}
+
+int main(){
+    //Se obtiene la path del diretorio tuplas donde estan almacanadas las key y se abre el directorio
+    const char *rel_path = "./tuplas";
+    abs_path = realpath(rel_path, NULL);
+
+	// Llamada a las funciones
+	test_1();
+	test_2();    
+    test_3();
+    test_4();
+    return 0;	
 }

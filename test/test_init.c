@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 
+char *abs_path;
 
 int print_files(char *abs_path){
     //Imprime por pantalla los archivos que hay en el directorio tuplas
@@ -17,22 +18,12 @@ int print_files(char *abs_path){
     return 0;
 }
 
-int main() {
-
-    //Se obtine la path del diretorio tuplas donde estan almacanadas las key y se abre el directorio
-    const char *rel_path = "./tuplas";
-    char *abs_path;
-    abs_path = realpath(rel_path, NULL);
-
-    //Declaración de variables
-    int in;
-    int n = 32;
-    double vector[n];
-
-	printf("=========Test de init=========\n");
-
-    /*Test 1: No hay ningún archivo en la carpeta tuplas donde se enciantran las keys*/
+void test_1() {
+	/*Test 1: No hay ningún archivo en la carpeta tuplas donde se enciantran las keys*/
 	printf("Test 1: No hay ningún archivo en la carpeta tuplas\n");
+
+	//Declaración de variables
+    int in;
 
     //Se borran los archivos y comprueba si los a borrado
     in = init();
@@ -41,8 +32,17 @@ int main() {
         print_files(abs_path);
     }
 
-    /*Test 2: borra todos los arhivos de la carpeta tuplas sabiendo que exite uno */
+}
+
+void test_2() {
+	/*Test 2: borra todos los arhivos de la carpeta tuplas sabiendo que exite uno */
     printf("\nTest 2: Existe un archivo en la carpeta\n");
+
+	//Declaración de variables
+    int in;
+    int n = 32;
+    double vector[n];
+
 
     //Se crea una clave en el directorio tuplas
     for (int i = 0; i < n; i++) {vector[i] = (double)i;}
@@ -55,7 +55,15 @@ int main() {
     in = init();
     printf("Resultado prueba 2: %d\n", in);
     print_files(abs_path);
+}
 
+int main() {
+
+    //Se obtine la path del diretorio tuplas donde estan almacanadas las key y se abre el directorio
+    const char *rel_path = "./tuplas";
+    abs_path = realpath(rel_path, NULL);
+
+    test_1();
+    test_2();
     return 0;
-
 }

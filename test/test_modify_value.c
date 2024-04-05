@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 
+char *abs_path;    
 
 int print_files(char *abs_path) {
     //Imprime por pantalla los archivos que hay en el directorio tuplas
@@ -57,24 +58,8 @@ int leer_fichero(char *abs_path, int k){
     return 0;
 }
 
-
-int main(){
-    //Se obtine la path del diretorio tuplas donde estan almacanadas las key y se abre el directorio
-    const char *rel_path = "./tuplas";
-    char *abs_path;
-    abs_path = realpath(rel_path, NULL);
-
-    //Se borran todos lor archivos y se crea un archivo
-    init();
-    int  modify;
-    int n = 1;
-    int k = 1;
-    double *vector = calloc(n, sizeof(double));
-    for (int i = 0; i < n; i++) { vector[i] = (double) i; }
-    set_value(k, "archivo", n, vector);
-
-    printf("\n=========Test de modify_value=========\n");
-    /*Test 1: funcionamiento corecto*/
+void test_1(int k) {
+	/*Test 1: funcionamiento corecto*/
     printf("Test 1: todo correcto\n");
 
     print_files(abs_path);
@@ -82,32 +67,41 @@ int main(){
     leer_fichero(abs_path, k);
 
     //Se modifica el archivo
-    n = 3;
+    int n = 3;
+    double *vector = calloc(n, sizeof(double));
+    
     for (int i = 0; i < n; i++) { vector[i] = (double) i; }
-    modify = modify_value(k, "archivo_cambiado", n , vector);
+    int modify = modify_value(k, "archivo_cambiado", n , vector);
     printf("Resultado prueba 1: %d\n", modify);
 
     print_files(abs_path);
     printf("Los datos que hay en el archivo modificado: \n");
     leer_fichero(abs_path, k);
 	free(vector);
+}
 
-    /*Test 2: no hay ningun archivo*/
+void test_2(int k) {
+	/*Test 2: no hay ningun archivo*/
     printf("\nTest 2: no existe ninguna clave\n");
     //Se borran los archivos
     init();
     print_files(abs_path);
-    vector = calloc(n, sizeof(double));
-    modify = modify_value(k, "archivo_cambiado", n , vector);
+    
+    int n = 6;
+    double *vector = calloc(n, sizeof(double));
+    int modify = modify_value(k, "archivo_cambiado", n , vector);
     printf("Resultado prueba 2: %d\n", modify);
 	free(vector);
 
-    /*Test 3: se modifica el archivo y N = 0 */
+}
+
+void test_3(int k) {
+	/*Test 3: se modifica el archivo y N = 0 */
     printf("\nTest 3: N = 0 \n");
     //Se borran todos lor archivos y se crea un archivo
     init();
-    n = 1;
-    vector = calloc(n, sizeof(double));
+    int n = 1;
+    double *vector = calloc(n, sizeof(double));
     for (int i = 0; i < n; i++) { vector[i] = (double) i; }
     set_value(k, "archivo", n, vector);
     printf("Los datos que hay en el archivo creado: \n");
@@ -116,13 +110,16 @@ int main(){
     //Se modifica el archivo
     n = 0;
     vector = calloc(n, sizeof(double));
-    modify = modify_value(k, "archivo_cambiado", n , vector);
+    int modify = modify_value(k, "archivo_cambiado", n , vector);
     printf("Resultado prueba 3: %d\n", modify);
 	free(vector);
     printf("Los datos del archivo: \n");
     leer_fichero(abs_path, k);
 
-    /*Test4: Modifica el archivo*/
+}
+
+void test_4(int k) {
+	/*Test4: Modifica el archivo*/
     printf("\nTest 4: N = 32\n");
     
     //Fichero antes de la modificación
@@ -130,10 +127,10 @@ int main(){
     leer_fichero(abs_path, k);
     
     //Se modifica el archivo
-    n = 32;
-    vector = calloc(n, sizeof(double));
+    int n = 32;
+    double *vector = calloc(n, sizeof(double));
     for (int i = 0; i < n; i++) {vector[i] = (double) i; }
-    modify = modify_value(k, "archivo_cambiado", n , vector);
+    int modify = modify_value(k, "archivo_cambiado", n , vector);
     printf("Resultado prueba 4: %d\n", modify);
 	free(vector);
 
@@ -141,14 +138,37 @@ int main(){
 	printf("Los datos del fichero\n");
 	leer_fichero(abs_path, k);
 
-    /*Test 5: Modifica el archivo*/
+}
+
+void test_5(int k) {
+	/*Test 5: Modifica el archivo*/
     printf("\nTest 5: N = 33\n");
     //Se modifica el archivo
-    n = 33;
-    vector = calloc(n, sizeof(double));
+    int n = 33;
+    double *vector = calloc(n, sizeof(double));
     for (int i = 0; i < n; i++) {vector[i] = (double) i; }
-    modify = modify_value(k, "archivo_cambiado", n , vector);
+    int modify = modify_value(k, "archivo_cambiado", n , vector);
     printf("Resultado prueba 5: %d\n", modify);
     free(vector);
+}
 
+int main(){
+    //Se obtine la path del diretorio tuplas donde estan almacanadas las key y se abre el directorio
+    const char *rel_path = "./tuplas";
+    abs_path = realpath(rel_path, NULL);
+
+    //Se borran todos lor archivos y se crea un archivo
+    init();
+    int n = 1;
+    int k = 1;
+    double *vector = calloc(n, sizeof(double));
+    for (int i = 0; i < n; i++) { vector[i] = (double) i; }
+    set_value(k, "archivo", n, vector);
+
+    test_1(k);
+	test_2(k);
+    test_3(k);
+    test_4(k);
+    test_5(k);
+    return 0;
 }
