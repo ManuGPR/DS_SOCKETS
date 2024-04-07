@@ -20,7 +20,7 @@ int print_files(char *abs_path){
 
 void test_1() {
 	/*Test 1: No hay ningún archivo en la carpeta tuplas donde se enciantran las keys*/
-	printf("Test 1: No hay ningún archivo en la carpeta tuplas\n");
+	printf("======Test 1: No hay ningún archivo en la carpeta tuplas======\n");
 
 	//Declaración de variables
     int in;
@@ -36,7 +36,7 @@ void test_1() {
 
 void test_2() {
 	/*Test 2: borra todos los arhivos de la carpeta tuplas sabiendo que exite uno */
-    printf("\nTest 2: Existe un archivo en la carpeta\n");
+    printf("\n======Test 2: Existe un archivo en la carpeta======\n");
 
 	//Declaración de variables
     int in;
@@ -65,5 +65,6 @@ int main() {
 
     test_1();
     test_2();
+    printf("\n");
     return 0;
 }

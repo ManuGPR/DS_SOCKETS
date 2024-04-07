@@ -20,7 +20,7 @@ int print_files(char *abs_path) {
 
 void test_1(int k){
     /*Test 1: funcionamiento corecto*/
-    printf("Test 1: todo correcto\n");
+    printf("======Test 1: todo correcto======\n");
     print_files(abs_path);
     
     // Se borra el archvo
@@ -31,7 +31,7 @@ void test_1(int k){
 
 void test_2(int k) {
 	/* Test 2: no existe ninguna clave*/
-    printf("\nTest 2: no existe ninguna clave\n");
+    printf("\n======Test 2: no existe ninguna clave======\n");
     
     //Se borran los archivos
     init();
@@ -59,5 +59,6 @@ int main() {
 	// Llamada a los test
 	test_1(k);
 	test_2(k);
+	printf("\n");
 	return 0;
 }

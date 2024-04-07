@@ -60,10 +60,10 @@ int leer_fichero(char *abs_path, int k){
 
 void test_1(int k) {
 	/*Test 1: funcionamiento corecto*/
-    printf("Test 1: todo correcto\n");
+    printf("======Test 1: todo correcto======\n");
 
     print_files(abs_path);
-    printf("Los datos que hay en el archivo creado: \n");
+    printf("\nLos datos que hay en el archivo creado: \n");
     leer_fichero(abs_path, k);
 
     //Se modifica el archivo
@@ -72,17 +72,17 @@ void test_1(int k) {
     
     for (int i = 0; i < n; i++) { vector[i] = (double) i; }
     int modify = modify_value(k, "archivo_cambiado", n , vector);
-    printf("Resultado prueba 1: %d\n", modify);
+    printf("Resultado prueba 1: %d\n\n", modify);
 
     print_files(abs_path);
-    printf("Los datos que hay en el archivo modificado: \n");
+    printf("\nLos datos que hay en el archivo modificado: \n");
     leer_fichero(abs_path, k);
 	free(vector);
 }
 
 void test_2(int k) {
 	/*Test 2: no hay ningun archivo*/
-    printf("\nTest 2: no existe ninguna clave\n");
+    printf("======Test 2: no existe ninguna clave======\n");
     //Se borran los archivos
     init();
     print_files(abs_path);
@@ -97,7 +97,7 @@ void test_2(int k) {
 
 void test_3(int k) {
 	/*Test 3: se modifica el archivo y N = 0 */
-    printf("\nTest 3: N = 0 \n");
+    printf("\n======Test 3: N = 0 ======\n");
     //Se borran todos lor archivos y se crea un archivo
     init();
     int n = 1;
@@ -113,14 +113,14 @@ void test_3(int k) {
     int modify = modify_value(k, "archivo_cambiado", n , vector);
     printf("Resultado prueba 3: %d\n", modify);
 	free(vector);
-    printf("Los datos del archivo: \n");
+    printf("\nLos datos del archivo: \n");
     leer_fichero(abs_path, k);
 
 }
 
 void test_4(int k) {
 	/*Test4: Modifica el archivo*/
-    printf("\nTest 4: N = 32\n");
+    printf("======Test 4: N = 32 ======\n");
     
     //Fichero antes de la modificación
     printf("Los datos del fichero\n");
@@ -135,14 +135,14 @@ void test_4(int k) {
 	free(vector);
 
 	// Fichero después de la modificación
-	printf("Los datos del fichero\n");
+	printf("\nLos datos del fichero\n");
 	leer_fichero(abs_path, k);
 
 }
 
 void test_5(int k) {
 	/*Test 5: Modifica el archivo*/
-    printf("\nTest 5: N = 33\n");
+    printf("\n======Test 5: N = 33 ======\n");
     //Se modifica el archivo
     int n = 33;
     double *vector = calloc(n, sizeof(double));
@@ -170,5 +170,6 @@ int main(){
     test_3(k);
     test_4(k);
     test_5(k);
+    printf("\n");
     return 0;
 }

@@ -40,14 +40,15 @@ int leer_fichero(char *abs_path, int k){
     }
 
     // Lee y muestra cada caracter del archivo
+    printf("\nLos datos leídos son:\n");
     char linea[500];
     while(fgets(linea, sizeof(linea), archivo) !=NULL){
-        printf("%s\n", linea);
+        printf("%s", linea);
     }
 
     // Cierra el archivo
     fclose(archivo);
-    printf("\n");
+    printf("\n\n");
     return 0;
 }
 
@@ -89,7 +90,7 @@ int escribir_fichero(char *abs_path, int k, int N, char *value1, double *value2)
 
 void test_1() {
 	/*Test 1: funcionamiento corecto*/
-    printf("Test 1: todo correcto\n");
+    printf("======Test 1: todo correcto======\n");
 
     //Se borran todos lor archivos y se crea un archivo
     init();
@@ -106,27 +107,29 @@ void test_1() {
     set_value(k, "archivo", n, vector);
 
     print_files(abs_path);
-    printf("Los datos que hay en el archivo creado: \n");
     leer_fichero(abs_path, k);
 
-    //Se obtine el resultado
+    //Se obtiene el resultado
     int get = get_value(1, v1, &N , v2);
     printf("Resultado prueba 1: %d\n", get);
 
-    printf("Los datos que se han obtenido son:\n");
+    printf("\nLos datos que se han obtenido son:\n");
     printf("K: %i\n", k);
     printf("V1: %s\n", v1);
     printf("N: %i\n", N);
     printf("V2: ");
     for(int i = 0; i < N; i++){
-        printf("%lf\n", v2[i]);
+        printf("%lf", v2[i]);
+    	if (i != N-1) {
+    		printf(", ");
+    	}
     }
-
+    printf("\n");
 }
 
 void test_2() {
 	/*Test 2: no existe ninguna clave*/
-    printf("\nTest 2: no existe ninguna clave\n");
+    printf("\n======Test 2: no existe ninguna clave======\n");
 
     //Se borran los archivos
     init();
@@ -142,7 +145,7 @@ void test_2() {
 
 void test_3() {
 	/*Test 3: N = 33*/
-    printf("\nTest 3: N > 32 \n");
+    printf("\n======Test 3: N > 32======");
     
     int k = 3;
     int n = 33;
@@ -152,16 +155,19 @@ void test_3() {
     char v1[256];
     
     for (int i = 0; i < n; i++) { vector[i] = (double) i; }
+    
     //Crear un fichero a mano de N = 33
     escribir_fichero(abs_path, k, n, "prueba 3", vector);
+    
     leer_fichero(abs_path,k);
+    
     int get = get_value(k, v1, &N , v2);
     printf("Resultado prueba 3: %d\n", get);
 }
 
 void test_4() {
 	/*Test 4: len(value1) > 255*/
-    printf("\nTest 4: len(value1) > 255\n");
+    printf("\n======Test 4: len(value1) > 255======");
     init();
 
     char cadena[300];
@@ -178,7 +184,7 @@ void test_4() {
     leer_fichero(abs_path,k);
     int get = get_value(k, v1, &N , v2);
     printf("Resultado prueba 4: %d\n", get);
-    printf("Los datos que se han obtenido son:\n");
+    printf("\nLos datos que se han obtenido son:\n");
     printf("K: %i\n", k);
     printf("V1: %s\n", v1);
     printf("N: %i\n", N);
@@ -198,5 +204,6 @@ int main(){
 	test_2();    
     test_3();
     test_4();
+    printf("\n");
     return 0;	
 }

@@ -61,7 +61,7 @@ int leer_fichero(char *abs_path, int k){
 
 void test_1() {
 	/*Test 1: Crea un archivo */
-    printf("Test 1: funcionamiento para N = 1\n");
+    printf("======Test 1: funcionamiento para N = 1 ======\n");
     print_files(abs_path);
     int n = 1;
     int k = 1;
@@ -70,13 +70,14 @@ void test_1() {
     int set = set_value(k, "prueba_1", n, vector);
     printf("Resultado prueba 1 (todo bien): %d\n", set);
     print_files(abs_path);
+    printf("\n");
     if (set == 0){leer_fichero(abs_path, k);}
 	free(vector);
 }
 
 void test_2() {
 	/*Test 2: ya existe la key*/
-    printf("\nTest 2: key ya existe\n");
+    printf("\n======Test 2: key ya existe======\n");
     print_files(abs_path);
     int n = 1;
     int k = 1;
@@ -93,7 +94,7 @@ void test_2() {
 
 void test_3() {
 	/*Test 3: N = 0*/
-    printf("\nTest 3: N=0\n");
+    printf("\n======Test 3: N=0 ======\n");
     int n = 0;
     int k = 3;
     print_files(abs_path);
@@ -110,7 +111,7 @@ void test_3() {
 
 void test_4() {
 	/*Test 4: N = 2 */
-    printf("\nTest 4: N=2\n");
+    printf("\n======Test 4: N=2 ======\n");
     int n = 2;
     print_files(abs_path);
     int k = 4;
@@ -119,6 +120,7 @@ void test_4() {
     int set = set_value(k, "prueba_4", n, vector);
     printf("Resultado prueba 4 (N=2): %d\n", set);
     print_files(abs_path);
+    printf("\n");
     if (set == 0){leer_fichero(abs_path, k);}
     free(vector);
 	
@@ -126,7 +128,7 @@ void test_4() {
 
 void test_5() {
 	/*Test 5: N = 31 */
-    printf("\nTest 5: N=31\n");
+    printf("\n======Test 5: N=31 ======\n");
     print_files(abs_path);
     int n = 31;
     int k = 5;
@@ -135,6 +137,7 @@ void test_5() {
     int set = set_value(k, "prueba_5", n, vector);
     printf("Resultado prueba 5 (N=31): %d\n", set);
     print_files(abs_path);
+    printf("\n");
     if (set == 0){ leer_fichero(abs_path, k);}
 	free(vector);
 
@@ -142,7 +145,7 @@ void test_5() {
 
 void test_6() {
 	/*Test 6: N = 32 */
-    printf("\nTest 6: N=32\n");
+    printf("\n======Test 6: N=32 ======\n");
     print_files(abs_path);
     int n = 32;
     int k = 6;
@@ -151,6 +154,7 @@ void test_6() {
     int set = set_value(k, "prueba_6", n, vector);
     printf("Resultado prueba 6 (N=32): %d\n", set);
     print_files(abs_path);
+    printf("\n");
     if (set == 0){leer_fichero(abs_path, k);}
 	free(vector);
 
@@ -158,7 +162,7 @@ void test_6() {
 
 void test_7() {
 	/*Test 7: N = 33 */
-    printf("\nTest 7: N=33\n");
+    printf("\n======Test 7: N=33 ======\n");
     print_files(abs_path);
     int n = 33;
     int k = 7;
@@ -174,7 +178,7 @@ void test_7() {
 
 void test_8() {
 	/*Test 8: len(cadena) > 255 */
-    printf("\nTest 8: len(cadena) > 255 \n");
+    printf("\n======Test 8: len(cadena) > 255 ======\n");
     int n = 1;
     int k = 8;
     double *vector = calloc(n, sizeof(double));
@@ -204,6 +208,6 @@ int main() {
     test_6();
     test_7();
     test_8();
-    
+    printf("\n");
     return 0;
 }
