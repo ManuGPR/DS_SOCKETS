@@ -30,6 +30,7 @@ int init() {
 		return -1;
 	}    
 
+    //Crea el socket del lado cliente
 	sd = create_client_socket(ip_tuplas, port);
 	if (sd < 0) {
 		printf("Error: creación del socket del cliente de init\n");
@@ -38,14 +39,16 @@ int init() {
 
 	char *op = "1";
 	char r[4];
-	
+
+    //Se manda la operación al servidor
 	res = write_line(sd, op);
 	if (res == -1) {
 		printf("Error: envio de la operación de init\n");
 		close(sd);
 		return -1;
 	}
-	
+
+    //Recive la respuesta del servidor
 	res = read_line(sd, r, 4);
 	if (res == -1) {
 		printf("Error: recepción de la respuesta de init\n");
@@ -61,6 +64,8 @@ int set_value(int key, char *value1, int N_value2, double *V_value2){
     //Función set_value que manda el mensaje de set_value al servidor
     if (N_value2 <= 32 && N_value2 >= 1 && strlen(value1) < 256) {
         int sd, res;
+
+        //Se recive las varibles de entorno IP_TUPLAS y PORT_TUPLAS
         char *ip_tuplas = getenv("IP_TUPLAS");
         if (ip_tuplas == NULL) {
             printf("Error: getenv IP de set_value\n");
@@ -78,8 +83,8 @@ int set_value(int key, char *value1, int N_value2, double *V_value2){
             return -1;
         }
 
+        //Crea el socket del lado cliente
         sd = create_client_socket(ip_tuplas, port);
-        
         if (sd < 0) {
             printf("Error: creación del socket del cliente de set_value\n");
             return -1;
@@ -89,6 +94,7 @@ int set_value(int key, char *value1, int N_value2, double *V_value2){
         char r[4];
         char buffer[1024];
 
+        //Se manda la operación al servidor
         res = write_line(sd, op);
         if (res == -1) {
             printf("Error: envío la operación de set_value\n");
@@ -96,7 +102,7 @@ int set_value(int key, char *value1, int N_value2, double *V_value2){
             return -1;
         }
 
-
+        //Se manda la Key
         sprintf(buffer, "%i", key);
         res = write_line(sd, buffer);
         if (res == -1) {
@@ -163,6 +169,8 @@ int set_value(int key, char *value1, int N_value2, double *V_value2){
 int get_value(int key, char *value1, int *N_value2, double *V_value2){
     //Función set_value que manda el mensaje de get_value al servidor
     int sd, res;
+
+    //Se recive las varibles de entorno IP_TUPLAS y PORT_TUPLAS
     char *ip_tuplas = getenv("IP_TUPLAS");
     
     if (ip_tuplas == NULL) {
@@ -181,6 +189,7 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
         return -1;
     }
 
+    //Crea el socket del lado cliente
     sd = create_client_socket(ip_tuplas, port);
     if (sd < 0) {
         printf("Error: creación del socket del cliente de get_value\n");
@@ -191,6 +200,7 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
     char r[4];
     char buffer[1024];
 
+    //Se manda la operación al servidor
     res = write_line(sd, op);
     if (res == -1) {
         printf("Error: envío de la operación de get_value\n");
@@ -198,6 +208,7 @@ int get_value(int key, char *value1, int *N_value2, double *V_value2){
         return -1;
     }
 
+    //Se manda la key
     sprintf(buffer, "%d", key);
     res = write_line(sd, buffer);
     if (res == -1) {
@@ -281,6 +292,8 @@ int modify_value(int key, char *value1, int N_value2, double *V_value2){
     //Función modify_value que manda el mensaje de modify_value al servidor
     if (N_value2 <= 32 && N_value2 >= 1 && strlen(value1) < 256) {
         int sd, res;
+
+        //Se recive las varibles de entorno IP_TUPLAS y PORT_TUPLAS
         char *ip_tuplas = getenv("IP_TUPLAS");
         if (ip_tuplas == NULL) {
             printf("Error: getenv IP de modify_value\n");
@@ -298,6 +311,7 @@ int modify_value(int key, char *value1, int N_value2, double *V_value2){
             return -1;
         }
 
+        //Crea el socket del lado cliente
         sd = create_client_socket(ip_tuplas, port);
         if (sd < 0) {
             printf("Error: creación del socket del cliente de modify_value\n");
@@ -308,7 +322,7 @@ int modify_value(int key, char *value1, int N_value2, double *V_value2){
         char r[4];
         char buffer[1024];
 
-
+        //Se manda la operación al servidor
         res = write_line(sd, op);
         if (res == -1) {
             printf("Error: envío de la operación de modify_value\n");
@@ -316,6 +330,7 @@ int modify_value(int key, char *value1, int N_value2, double *V_value2){
             return -1;
         }
 
+        //Se manda la key
         sprintf(buffer, "%i", key);
         res = write_line(sd, buffer);
         if (res == -1) {
@@ -363,6 +378,7 @@ int modify_value(int key, char *value1, int N_value2, double *V_value2){
 		        }
 		    }
 
+            //Se recibe la respuesta del servidor
 		    res = read_line(sd, r, 4);
 		    if (res == -1) {
 		        printf("Error: recepción de la respuesta de modify_value\n");
@@ -380,6 +396,8 @@ int modify_value(int key, char *value1, int N_value2, double *V_value2){
 int delete_key(int key){
     //Función delete_key que manda el mensaje de delete_key al servidor
     int sd, res;
+
+    //Se recive las varibles de entorno IP_TUPLAS y PORT_TUPLAS
     char *ip_tuplas = getenv("IP_TUPLAS");
     if (ip_tuplas == NULL) {
         printf("Error: getenv IP de delete_key\n");
@@ -397,6 +415,7 @@ int delete_key(int key){
         return -1;
     }
 
+    //Crea el socket del lado cliente
     sd = create_client_socket(ip_tuplas, port);
     if (sd < 0) {
         printf("Error: creación del socket del cliente de delete_key\n");
@@ -407,6 +426,7 @@ int delete_key(int key){
     char r[4];
     char buffer[1024];
 
+    //Se manda la operación al servidor
     res = write_line(sd, op);
     if (res == -1) {
         printf("Error: envío de la operación de delete_key\n");
@@ -414,6 +434,7 @@ int delete_key(int key){
         return -1;
     }
 
+    //Se manda la key al servidor
     sprintf(buffer, "%i", key);
     res = write_line(sd, buffer);
     if (res == -1) {
@@ -422,6 +443,7 @@ int delete_key(int key){
         return -1;
     }
 
+    //Se recibe la respuesta del servidor
     res = read_line(sd, r, 4);
     if (res == -1) {
         printf("Error: recepción de la respuesta de delete_key\n");
@@ -436,6 +458,8 @@ int delete_key(int key){
 int exist(int key){
     //Función exist que manda el mensaje de exist al servidor
     int sd, res;
+
+    //Se recive las varibles de entorno IP_TUPLAS y PORT_TUPLAS
     char *ip_tuplas = getenv("IP_TUPLAS");
     if (ip_tuplas == NULL) {
         printf("Error: getenv IP de exist\n");
@@ -453,6 +477,7 @@ int exist(int key){
         return -1;
     }
 
+    //Crea el socket del lado cliente
     sd = create_client_socket(ip_tuplas, port);
     if (sd < 0) {
         printf("Error: creación del socket del cliente de exist\n");
@@ -463,6 +488,7 @@ int exist(int key){
     char r[4];
     char buffer[1024];
 
+    //Se manda la operación al servidor
     res = write_line(sd, op);
     if (res == -1) {
         printf("Error: envío de la operación de exist\n");
@@ -470,6 +496,7 @@ int exist(int key){
         return -1;
     }
 
+    //Se manda la key al servidor
     sprintf(buffer, "%d", key);
     res = write_line(sd, buffer);
     if (res == -1) {
@@ -478,6 +505,7 @@ int exist(int key){
         return -1;
     }
 
+    //Se recibe los datos del servidor
     res = read_line(sd, r, 4);
     if (res == -1) {
         printf("Error: recepción de la respuesta de exist\n");
