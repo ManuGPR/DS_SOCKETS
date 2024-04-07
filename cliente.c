@@ -29,7 +29,6 @@ int main() {
         else printf("\n");
     }
 
-
     // Llamada a la función modify value
     int new_n = 16;
     double vector_modify[new_n];
@@ -37,13 +36,11 @@ int main() {
     res = modify_value(10, "prueba de nueva cadena", new_n, vector_modify);
     printf("Modify value devuelve %d\n", res);
 
-
     // Llamada a la función exist 1
     int key = 10;
 
     res = exist(key);
     printf("Exist 1 devuelve %d\n", res);
-
 
     // Llamada a la función delete_key
     res = delete_key(key);
