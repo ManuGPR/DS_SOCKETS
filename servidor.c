@@ -91,7 +91,7 @@ int init_server(int * nsd) {
         pthread_exit(NULL);
 	}
 
-	close(sd)
+	close(sd);
 	pthread_exit(NULL);
 }
 
