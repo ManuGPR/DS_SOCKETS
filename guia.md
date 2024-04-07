@@ -2,7 +2,7 @@
 
 1. Primero, compila el proyecto con el fichero Makefile usando make. Este fichero compilará también las pruebas.
 
-2. En este paso se exportarán las variables de entorno necesarias. Hay dos maneras de hacerlo, con el paso 2.1 o con el paso 2.2.
+2. En este paso se exportarán las variables de entorno necesarias. Hay tres maneras de hacerlo:
 
 	**2.1. Usar el fichero de setup:** Antes de ejecutar el cliente y el servidor, ejecuta el fichero *setup.sh* con la sentencia ***. setup.sh***. Si se quieren modificar los valores del puerto y la ip del servidor, hay que modificar el fichero *setup.sh* y cambiar los valores por defecto de *PORT_TUPLAS* e *IP_TUPLAS*, respectivamente. El valor de *LD_LIBRARY_PATH* **no** debe ser cambiado.
 
