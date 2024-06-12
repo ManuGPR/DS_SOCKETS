@@ -4,5 +4,5 @@ This is a university project for the subject Distributed Systems. This project i
 
 ## Authors:
 
-- Manuel Gómez-Plana Rodríguez
-- Marina Pérez Barbero
+- [Manuel Gómez-Plana Rodríguez](https://github.com/ManuGPR)
+- [Marina Pérez Barbero](https://github.com/Marina963)
